@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
 <head>
 <script id="versionArea" type="text/javascript">
 //<![CDATA[
@@ -512,8 +512,1014 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
+<div title="ClickTodoPlugin" created="201007101502" modified="201011301042" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#ClickTodoPlugin" server.page.revision="201007120147" changecount="2">
+<pre>/***
+|''Name''|ClickTodoPlugin|
+|''Description''|TODO plugin that can be clicked. |
+|''Author''|ongaeshi|
+|''Plugin last updated''|2010/07/10 23:35|
+|''Version''|1.0.0|
+|''SHA-1 hash''||
+|''Min. TiddlyWiki version required''|2.5.0|
+|''Dependencies''||
+|''Size''|3.0KB|
+|''License''|http://www.opensource.org/licenses/mit-license.php|
+|''URL''|http://ongaeshi.tiddlyspot.com/#ClickTodoPlugin|
+!Description
+TODO plugin that can be clicked. 
+!Notes
+!Examples
+&lt;&lt;todo2&gt;&gt; It changes into DONE if it clicks. 
+&lt;&lt;todo2 0&gt;&gt; It changes into TODO if it clicks. 
+!Usage
+{{{
+&lt;&lt;todo2&gt;&gt; Todo item.
+&lt;&lt;todo2 0&gt;&gt; Done item.
+}}}
+!Revision History
+|2010-07-10|v1.0.0|1st version.|
+!To Do
+&lt;...&gt;
+!Code
+***/
+//{{{
+config.macros.todo2 = {
+    handler: function(place, macroName, params, wikifier, paramString, tiddler) {
+        var e = document.createElement('span');
+        e.tiddler = tiddler;
+        e.params = params;
+        e.matchStart = wikifier.matchStart;
+
+        if (params[0] == '0') {
+//            e.setAttribute('style','color: white; background:gray;font-weight:bold;padding:1px 2px;');
+            e.setAttribute('style','color: #ffffff; background:#a0a0a0;font-weight:bold;padding:1px 2px;');
+            e.appendChild(document.createTextNode(&quot;DONE&quot;));
+        }
+        else {
+            //    e.setAttribute('style','color: white; background:red; font-weight:bold;padding:1px 2px;');
+            e.setAttribute('style','color: #ffffff; background:#f04020; font-weight:bold;padding:1px 2px;');
+            e.appendChild(document.createTextNode(&quot;TODO&quot;));
+        }
+
+        place.appendChild(e);
+
+        addEvent(e, 'mousedown', this.onMouseDown);
+
+        return(e);
+    },
+
+    onMouseDown: function(event) {
+        if (this.params[0] == '0') {
+            if (confirm(&quot;DONE -&gt; TODO ?&quot;))
+                config.macros.todo2.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;todo2&gt;&gt;&quot;, true, null);
+        } else {
+            var result = this.tiddler.text.substr(this.matchStart).match(/&gt;&gt;\s*?(.*?)\n/);
+            config.macros.todo2.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;todo2 0&gt;&gt;&quot;, true, &quot;[DONE] &quot; + result[1]);
+        }
+    },
+
+    replace: function(tiddler, matchStart, replaceText, isSave, message) {
+        var pos = tiddler.text.substr(matchStart).search(&quot;&gt;&gt;&quot;);
+        pos += 2;
+
+        tiddler.text = tiddler.text.substr(0, matchStart) + replaceText + tiddler.text.substr(matchStart + pos);
+
+        // 表示を更新
+        if (!story.isDirty(tiddler.title)) {
+            // tiddlerの表示を更新する
+            story.refreshTiddler(tiddler.title,null,true);
+
+            // 内容を保存
+            if (isSave)
+                story.saveTiddler(tiddler.title,false);
+
+            // 右上にメッセージ
+            if (message)
+                displayMessage(message);
+        }
+    },
+
+    addEvent: function(elm, type, event) {
+        if (window.addEventListener)
+            elm.addEventListener(type, event, false);
+        else if (window.attachEvent)
+            elm.attachEvent('on'+type, event);
+        else 
+            elm['on'+type] = event;
+    }
+
+}
+    
+//}}}
+</pre>
+</div>
 <div title="DefaultTiddlers" created="201011290211" changecount="1">
 <pre>[[Startup]]</pre>
+</div>
+<div title="JapaneseTranslationPlugin" modifier="Ogoshi" created="200709231934" modified="201004290508" tags="systemConfig" server.type="file" server.host="ogoshi.tiddlyspot.com/#JapaneseTranslationPlugin" server.page.revision="201004290508">
+<pre>/***
+|''Name:''|JapaneseTranslationPlugin |
+|''Description:''|Translation of TiddlyWiki into Japanese |
+|''Author:''|OGOSHI Masayuki &amp;lt;ogoshima@gmail.com&amp;gt; |
+|''Source:''|http://ogoshi.tiddlyspot.com/#JapaneseTranslationPlugin |
+|''Version:''|0.4.1-ja|
+|''Date:''|Apr 29, 2010|
+|''License:''|[[Creative Commons Attribution-ShareAlike 2.1 Japan |http://creativecommons.org/licenses/by-sa/2.1/jp/]] |
+|''~CoreVersion:''|2.6.0|
+
+TiddlyWiki を日本語化するプラグイン。TiddlyWiki Version 2.6 上で動作を確認しました。
+ライセンスは英語版のCCライセンスに準じる日本語版の CC-by-SA 2.1 ライセンスとします。
+
+オリジナルとなる英語版のクレジットは以下のとおり。
+|''Name:''|EnglishTranslationPlugin|
+|''Description:''|Translation of TiddlyWiki into English|
+|''Author:''|MartinBudden (mjbudden (at) gmail (dot) com)|
+|''CodeRepository:''|http://svn.tiddlywiki.org/Trunk/association/locales/core/en/locale.en.js |
+|''Version:''|0.4.1|
+|''Date:''|Mar 10, 2010|
+|''Comments:''|Please make comments at http://groups.google.co.uk/group/TiddlyWikiDev |
+|''License:''|[[Creative Commons Attribution-ShareAlike 3.0 License|http://creativecommons.org/licenses/by-sa/3.0/]] |
+|''~CoreVersion:''|2.6.0|
+***/
+
+//{{{
+//--
+//-- Translateable strings
+//--
+
+// Strings in &quot;double quotes&quot; should be translated; strings in 'single quotes' should be left alone
+
+config.locale = &quot;ja&quot;; // W3C language tag
+
+if (config.options.txtUserName == 'YourName') // do not translate this line, but do translate the next line
+	merge(config.options,{txtUserName: &quot;氏名&quot;});
+
+merge(config.tasks,{
+	save: {text: &quot;保存&quot;, tooltip: &quot;このTiddlyWikiを保存します&quot;, action: saveChanges},
+	sync: {text: &quot;同期&quot;, tooltip: &quot;他のTiddlyWikiファイルやサーバと同期をとります&quot;, content: '&lt;&lt;sync&gt;&gt;'},
+	importTask: {text: &quot;取り込み&quot;, tooltip: &quot;他のTiddlyWikiファイルやサーバからtiddlerやプラグインを取り込みます&quot;, content: '&lt;&lt;importTiddlers&gt;&gt;'},
+	tweak: {text: &quot;詳細設定&quot;, tooltip: &quot;TiddlyWikiの細かな振る舞いを設定します&quot;, content: '&lt;&lt;options&gt;&gt;'},
+	upgrade: {text: &quot;アップグレード&quot;, tooltip: &quot;TiddlyWiki本体をバージョンアップします&quot;, content: '&lt;&lt;upgrade&gt;&gt;'},
+	plugins: {text: &quot;プラグイン&quot;, tooltip: &quot;インストール済みのプラグインを管理します&quot;, content: '&lt;&lt;plugins&gt;&gt;'}
+});
+
+// Options that can be set in the options panel and/or cookies
+merge(config.optionsDesc,{
+	txtUserName: &quot;編集したtiddlerに記録されるユーザ名&quot;,
+	chkRegExpSearch: &quot;検索に正規表現を使います&quot;,
+	chkCaseSensitiveSearch: &quot;検索で大文字小文字を区別します&quot;,
+	chkIncrementalSearch: &quot;インクリメンタルサーチを行います&quot;,
+	chkAnimate: &quot;アニメーションを許可します&quot;,
+	chkSaveBackups: &quot;保存時にバックアップファイルを残します&quot;,
+	chkAutoSave: &quot;自動保存します&quot;,
+	chkGenerateAnRssFeed: &quot;保存時にRSSフィードを生成します&quot;,
+	chkSaveEmptyTemplate: &quot;空のテンプレートファイルを保存時に生成します&quot;,
+	chkOpenInNewWindow: &quot;外部へのリンクを新しいウィンドウで開きます&quot;,
+	chkToggleLinks: &quot;tiddlerへのリンククリックでtiddlerを閉じます&quot;,
+	chkHttpReadOnly: &quot;HTTP経由で開いているときに編集機能を隠します&quot;,
+	chkForceMinorUpdate: &quot;更新時にユーザ名と日付を変更しません&quot;,
+	chkConfirmDelete: &quot;tiddlerを消去する時に確認をします&quot;,
+	chkInsertTabs: &quot;タブキーを押したとき、フィールド間の移動ではなくタブ文字を挿入します&quot;,
+	txtBackupFolder: &quot;バックアップ用フォルダの名前&quot;,
+	txtMaxEditRows: &quot;編集領域の最大行数&quot;,
+	txtTheme: &quot;使用するテーマ名&quot;,
+	txtFileSystemCharSet: &quot;保存時のデフォルト文字コード(Firefox/Mozillaのみ)&quot;});
+
+merge(config.messages,{
+	customConfigError: &quot;プラグインの読み込み時に問題が発生しました。詳細は PluginManager をご覧ください&quot;,
+	pluginError: &quot;エラー: %0&quot;,
+	pluginDisabled: &quot;'systemConfigDisable'タグによって実行が禁止されています&quot;,
+	pluginForced: &quot;'systemConfigForce'タグによって強制実行されました&quot;,
+	pluginVersionError: &quot;このプラグインの実行には、新しいバージョンの TiddlyWiki が必要です。&quot;,
+	nothingSelected: &quot;何も選択されていません。一つ以上選択する必要があります。&quot;,
+	savedSnapshotError: &quot;この~TiddlyWikiは正常に保存されていません。詳細は http://www.tiddlywiki.com/#DownloadSoftware をご覧ください。&quot;,
+	subtitleUnknown: &quot;(unknown)&quot;,
+	undefinedTiddlerToolTip: &quot;この tiddler '%0' はまだ作成されていません&quot;,
+	shadowedTiddlerToolTip: &quot;この tiddler '%0' はまだ作成されていませんが、隠された規定値があります&quot;,
+	tiddlerLinkTooltip: &quot;%0 - %1, %2&quot;,
+	externalLinkTooltip: &quot;(外部へのリンク) %0&quot;,
+	noTags: &quot;タグの付いた tiddler はありません&quot;,
+	notFileUrlError: &quot;変更を保存するにはこの~TiddlyWikiをファイルとして保存(ダウンロード)する必要があります&quot;,
+	cantSaveError: &quot;変更を保存できませんでした。以下の理由が考えられます:\n- 使用しているブラウザが保存に対応していない(Firefox/Internet Explorer/Safari/Operaは、正しく設定していれば保存できます)\n- TiddlyWikiファイルの保存path名に不正な文字が含まれている\n- TiddlyWiki HTMLファイルが移動または名前を変更された&quot;,
+	invalidFileError: &quot;元のファイル '%0' は正しい~TiddlyWikiファイルではありません&quot;,
+	backupSaved: &quot;バックアップを保存しました&quot;,
+	backupFailed: &quot;バックアップの保存に失敗しました&quot;,
+	rssSaved: &quot;RSSフィードを保存しました&quot;,
+	rssFailed: &quot;RSSフィードの保存に失敗しました&quot;,
+	emptySaved: &quot;空のテンプレートファイルを保存しました&quot;,
+	emptyFailed: &quot;空のテンプレートファイルの保存に失敗しました&quot;,
+	mainSaved: &quot;TiddlyWikiファイルを保存しました&quot;,
+	mainFailed: &quot;TiddlyWikiファイルの保存に失敗しました。変更した内容は保存されていません&quot;,
+	macroError: &quot;次のマクロでエラー発生 &lt;&lt;\%0&gt;&gt;&quot;,
+	macroErrorDetails: &quot;次のマクロを実行中にエラー発生 &lt;&lt;\%0&gt;&gt;:\n%1&quot;,
+	missingMacro: &quot;マクロがありません&quot;,
+	overwriteWarning: &quot;'%0'という名前のtiddlerはすでに存在します。OKで上書きします&quot;,
+	unsavedChangesWarning: &quot;注意! TiddlyWiki の変更が保存されていません。\n\n'OK'で保存\n'キャンセル'で変更を破棄&quot;,
+	confirmExit: &quot;--------------------------------\n\nTiddlyWikiの変更が保存されていません。このまま続けると変更が失われます\n\n--------------------------------&quot;,
+	saveInstructions: &quot;変更を保存&quot;,
+	unsupportedTWFormat: &quot;次の TiddlyWiki フォーマットには対応していません '%0'&quot;,
+	tiddlerSaveError: &quot;tiddler '%0' を保存時にエラー発生&quot;,
+	tiddlerLoadError: &quot;tiddler '%0' の読込時にエラー発生&quot;,
+	wrongSaveFormat: &quot;保存フォーマット '%0' で保存できません。標準フォーマットで保存します&quot;,
+	invalidFieldName: &quot;%0 は不正なファイル名です&quot;,
+	fieldCannotBeChanged: &quot;領域 '%0' は変更できません&quot;,
+	loadingMissingTiddler: &quot;tiddler '%0' の '%1' サーバーからの回復を試しています:\n\nワークスペース '%3' の中の '%2'&quot;,
+	upgradeDone: &quot;バージョン %0 へのアップグレードが完了しました。\n'OK' をクリックすると新しくなったTiddlyWikiをリロードします。&quot;});
+
+merge(config.messages.messageClose,{
+	text: &quot;閉じる&quot;,
+	tooltip: &quot;このメッセージを閉じます&quot;});
+
+config.messages.backstage = {
+	open: {text: &quot;クイックメニュー&quot;, tooltip: &quot;クイックメニューを開きます&quot;},
+	close: {text: &quot;閉じる&quot;, tooltip: &quot;クイックメニューを閉じます&quot;},
+	prompt: &quot;クイックメニュー: &quot;,
+	decal: {
+		edit: {text: &quot;編集&quot;, tooltip: &quot;tiddler '%0' を編集します&quot;}
+	}
+};
+
+config.messages.listView = {
+	tiddlerTooltip: &quot;このtiddlerのテキスト全体を表示します&quot;,
+	previewUnavailable: &quot;(プレビューがありません)&quot;
+};
+
+config.messages.dates.months = [&quot;1月&quot;, &quot;2月&quot;, &quot;3月&quot;, &quot;4月&quot;, &quot;5月&quot;, &quot;6月&quot;, &quot;7月&quot;, &quot;8月&quot;, &quot;9月&quot;, &quot;10月&quot;, &quot;11月&quot;,&quot;12月&quot;];
+config.messages.dates.days = [&quot;日曜日&quot;, &quot;月曜日&quot;, &quot;火曜日&quot;, &quot;水曜日&quot;, &quot;木曜日&quot;, &quot;金曜日&quot;, &quot;土曜日&quot;];
+config.messages.dates.shortMonths = [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;10&quot;, &quot;11&quot;, &quot;12&quot;];
+config.messages.dates.shortDays = [&quot;日&quot;, &quot;月&quot;, &quot;火&quot;, &quot;水&quot;, &quot;木&quot;, &quot;金&quot;, &quot;土&quot;];
+// suffixes for dates, eg &quot;1st&quot;,&quot;2nd&quot;,&quot;3rd&quot;...&quot;30th&quot;,&quot;31st&quot;
+config.messages.dates.daySuffixes = [&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,
+		&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,
+		&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,&quot;日&quot;,
+		&quot;日&quot;];
+config.messages.dates.am = &quot;am&quot;;
+config.messages.dates.pm = &quot;pm&quot;;
+
+merge(config.messages.tiddlerPopup,{
+	});
+
+merge(config.views.wikified.tag,{
+	labelNoTags: &quot;タグ無し&quot;,
+	labelTags: &quot;タグ: &quot;,
+	openTag: &quot;'%0' タグを開く&quot;,
+	tooltip: &quot;'%0' タグの付いたtiddlerを表示&quot;,
+	openAllText: &quot;全て開く&quot;,
+	openAllTooltip: &quot;以下のtiddlerを全て開く&quot;,
+	popupNone: &quot;'%0' タグの付いたtiddlerは他にありません&quot;});
+
+merge(config.views.wikified,{
+	defaultText: &quot;tiddler '%0' はまだ作成されていません。ダブルクリックで作成できます&quot;,
+	defaultModifier: &quot;(missing)&quot;,
+	shadowModifier: &quot;(built-in shadow tiddler)&quot;,
+	dateFormat: &quot;YYYY.MM.DD&quot;, // use this to change the date format for your locale, eg &quot;YYYY MMM DD&quot;, do not translate the Y, M or D
+	createdPrompt: &quot;作成&quot;});
+
+merge(config.views.editor,{
+	tagPrompt: &quot;スペース区切りでタグを入力。スペースを含める場合は[[二重の角括弧]]で囲みます。既存のタグを選択≫&quot;,
+	defaultText: &quot;'%0' の内容を入力してください&quot;});
+
+merge(config.views.editor.tagChooser,{
+	text: &quot;タグ&quot;,
+	tooltip: &quot;既存のタグを選択して追加します&quot;,
+	popupNone: &quot;タグが定義されていません&quot;,
+	tagTooltip: &quot;'%0' タグを追加します&quot;});
+
+merge(config.messages,{
+	sizeTemplates:
+		[
+		{unit: 1024*1024*1024, template: &quot;%0\u00a0GB&quot;},
+		{unit: 1024*1024, template: &quot;%0\u00a0MB&quot;},
+		{unit: 1024, template: &quot;%0\u00a0KB&quot;},
+		{unit: 1, template: &quot;%0\u00a0B&quot;}
+		]});
+
+merge(config.macros.search,{
+	label: &quot;検索&quot;,
+	prompt: &quot;この TiddlyWiki 内を検索します&quot;,
+	accessKey: &quot;F&quot;,
+	successMsg: &quot;%0 件のtiddlerで %1 が見つかりました&quot;,
+	failureMsg: &quot;%0 は見つかりませんでした&quot;});
+
+merge(config.macros.tagging,{
+	label: &quot;タグあり: &quot;,
+	labelNotTag: &quot;タグなし&quot;,
+	tooltip: &quot;'%0' タグを付けたtiddlerリスト&quot;});
+
+merge(config.macros.timeline,{
+	dateFormat: &quot;YYYY年MM月DD日&quot;});// use this to change the date format for your locale, eg &quot;YYYY MMM DD&quot;, do not translate the Y, M or D
+
+merge(config.macros.allTags,{
+	tooltip: &quot;'%0' タグの付いたtiddlerを表示&quot;,
+	noTags: &quot;タグの付いたtiddlerがありません&quot;});
+
+config.macros.list.all.prompt = &quot;アルファベット順 全tiddler&quot;;
+config.macros.list.missing.prompt = &quot;リンクがあるのに存在しないtiddler&quot;;
+config.macros.list.orphans.prompt = &quot;どこからもリンクされていないtiddler&quot;;
+config.macros.list.shadowed.prompt = &quot;規定で隠されているtiddler&quot;;
+config.macros.list.touched.prompt = &quot;ローカルに変更されているtiddler&quot;;
+
+merge(config.macros.closeAll,{
+	label: &quot;全て閉じる&quot;,
+	prompt: &quot;表示されている全てのtiddlerを閉じます (編集中を除く)&quot;});
+
+merge(config.macros.permaview,{
+	label: &quot;現況リンク&quot;,
+	prompt: &quot;現在のtiddler表示状態を再現するURLをアドレス欄に生成します&quot;});
+
+merge(config.macros.saveChanges,{
+	label: &quot;保存&quot;,
+	prompt: &quot;全てのtiddlerを保存します&quot;,
+	accessKey: &quot;S&quot;});
+
+merge(config.macros.newTiddler,{
+	label: &quot;新規作成&quot;,
+	prompt: &quot;新しいtiddlerを作成します&quot;,
+	title: &quot;新規作成&quot;,
+	accessKey: &quot;N&quot;});
+
+merge(config.macros.newJournal,{
+	label: &quot;新規ジャーナル&quot;,
+	prompt: &quot;現在日時がタイトルの新しいtiddlerを作成します&quot;,
+	accessKey: &quot;J&quot;});
+
+merge(config.macros.options,{
+	wizardTitle: &quot;詳細設定&quot;,
+	step1Title: &quot;これらのオプション設定はブラウザのcookieに保存されます&quot;,
+	step1Html: &quot;&lt;input type='hidden' name='markList'&gt;&lt;/input&gt;&lt;br&gt;&lt;input type='checkbox' checked='false' name='chkUnknown'&gt;未知のオプションを表示&lt;/input&gt;&quot;,
+	unknownDescription: &quot;//(未知)//&quot;,
+	listViewTemplate: {
+		columns: [
+			{name: 'Option', field: 'option', title: &quot;オプション設定&quot;, type: 'String'},
+			{name: 'Description', field: 'description', title: &quot;説明&quot;, type: 'WikiText'},
+			{name: 'Name', field: 'name', title: &quot;オプション名&quot;, type: 'String'}
+			],
+		rowClasses: [
+			{className: 'lowlight', field: 'lowlight'}
+			]}
+	});
+
+merge(config.macros.plugins,{
+	wizardTitle: &quot;プラグイン管理&quot;,
+	step1Title: &quot;ロードされているプラグイン&quot;,
+	step1Html: &quot;&lt;input type='hidden' name='markList'&gt;&lt;/input&gt;&quot;, // DO NOT TRANSLATE
+	skippedText: &quot;(このプラグインは起動後に追加されたので実行されていません)&quot;,
+	noPluginText: &quot;プラグインはインストールされていません&quot;,
+	confirmDeleteText: &quot;本当にこのプラグインを削除して良いですか?:\n\n%0&quot;,
+	removeLabel: &quot;systemConfig タグを除去&quot;,
+	removePrompt: &quot;systemConfig タグを除去します&quot;,
+	deleteLabel: &quot;削除&quot;,
+	deletePrompt: &quot;これらのtiddlerを削除します&quot;,
+	listViewTemplate: {
+		columns: [
+			{name: 'Selected', field: 'Selected', rowName: 'title', type: 'Selector'},
+			{name: 'Tiddler', field: 'tiddler', title: &quot;Tiddler&quot;, type: 'Tiddler'},
+			{name: 'Description', field: 'Description', title: &quot;説明&quot;, type: 'String'},
+			{name: 'Version', field: 'Version', title: &quot;バージョン&quot;, type: 'String'},
+			{name: 'Size', field: 'size', tiddlerLink: 'size', title: &quot;サイズ&quot;, type: 'Size'},
+			{name: 'Forced', field: 'forced', title: &quot;強制実行&quot;, tag: 'systemConfigForce', type: 'TagCheckbox'},
+			{name: 'Disabled', field: 'disabled', title: &quot;無効化&quot;, tag: 'systemConfigDisable', type: 'TagCheckbox'},
+			{name: 'Executed', field: 'executed', title: &quot;ロード済み&quot;, type: 'Boolean', trueText: &quot;Yes&quot;, falseText: &quot;No&quot;},
+			{name: 'Startup Time', field: 'startupTime', title: &quot;起動時実行&quot;, type: 'String'},
+			{name: 'Error', field: 'error', title: &quot;ステータス&quot;, type: 'Boolean', trueText: &quot;Error&quot;, falseText: &quot;OK&quot;},
+			{name: 'Log', field: 'log', title: &quot;ログ&quot;, type: 'StringList'}
+			],
+		rowClasses: [
+			{className: 'error', field: 'error'},
+			{className: 'warning', field: 'warning'}
+			]}
+	});
+
+merge(config.macros.toolbar,{
+	moreLabel: &quot;その他&quot;,
+	morePrompt: &quot;その他のコマンドも表示します&quot;,
+	lessLabel: &quot;隠す&quot;,
+	lessPrompt: &quot;その他のコマンドを隠します&quot;,
+	separator: &quot;|&quot;
+	});
+
+merge(config.macros.refreshDisplay,{
+	label: &quot;再表示&quot;,
+	prompt: &quot;TiddlyWiki全体を再描画します&quot;
+	});
+
+merge(config.macros.importTiddlers,{
+	readOnlyWarning: &quot;読込専用のTiddlyWikiには取り込めません。TiddlyWikiファイルを file:// 形式のURLで開いてみてください&quot;,
+	wizardTitle: &quot;他のファイルあるいはサーバーからtiddlerを取り込む&quot;,
+	step1Title: &quot;手順 1: TiddlyWikiファイルあるいはサーバーの位置を指定します&quot;,
+	step1Html: &quot;種別指定: &lt;select name='selTypes'&gt;&lt;option value=''&gt;選択...&lt;/option&gt;&lt;/select&gt;&lt;br&gt;URLまたはパス名を入力: &lt;input type='text' size=50 name='txtPath'&gt;&lt;br&gt;またはファイルを選択: &lt;input type='file' size=50 name='txtBrowse'&gt;&lt;br&gt;&lt;hr&gt;または既定のフィードを選択: &lt;select name='selFeeds'&gt;&lt;option value=''&gt;選択...&lt;/option&gt;&lt;/select&gt;&quot;,
+	openLabel: &quot;開く&quot;,
+	openPrompt: &quot;このファイルあるいはサーバーへ接続する&quot;,
+	openError: &quot;TiddlyWikiファイルを取り込む際に問題が発生しました&quot;,
+	statusOpenHost: &quot;ホストをオープン中&quot;,
+	statusGetWorkspaceList: &quot;有効なワークスペースのリストを取得中&quot;,
+	step2Title: &quot;手順 2: ワークスペースの選択&quot;,
+	step2Html: &quot;ワークスペース名を入力: &lt;input type='text' size=50 name='txtWorkspace'&gt;&lt;br&gt;またはワークスペースを選択: &lt;select name='selWorkspace'&gt;&lt;option value=''&gt;選択...&lt;/option&gt;&lt;/select&gt;&quot;,
+	cancelLabel: &quot;キャンセル&quot;,
+	cancelPrompt: &quot;この取り込みをキャンセルする&quot;,
+	statusOpenWorkspace: &quot;ワークスペースをオープン中&quot;,
+	statusGetTiddlerList: &quot;有効なtiddlerのリストを取得中&quot;,
+	errorGettingTiddlerList: &quot;tiddlerのリストを取得中にエラーが発生しました。'キャンセル'でやり直します。&quot;,
+	step3Title: &quot;手順 3: 取り込むtiddlerの選択&quot;,
+	step3Html: &quot;&lt;input type='hidden' name='markList'&gt;&lt;/input&gt;&lt;br&gt;&lt;input type='checkbox' checked='true' name='chkSync'&gt;変更を同期できるよう、各tiddlerにこのサーバー（ファイル）へのリンクを保持する&lt;/input&gt;&lt;br&gt;&lt;input type='checkbox' name='chkSave'&gt;'systemServer' タグを付けたtiddlerにこのサーバーの詳細を保存する:&lt;/input&gt; &lt;input type='text' size=25 name='txtSaveTiddler'&gt;&quot;,
+	importLabel: &quot;取込&quot;,
+	importPrompt: &quot;これらのtiddlerを取り込む&quot;,
+	confirmOverwriteText: &quot;本当にこれらのtiddlerを上書きして良いですか? :\n\n%0&quot;,
+	step4Title: &quot;手順 4: tiddler %0 を取り込み&quot;,
+	step4Html: &quot;&lt;input type='hidden' name='markReport'&gt;&lt;/input&gt;&quot;, // DO NOT TRANSLATE
+	doneLabel: &quot;完了&quot;,
+	donePrompt: &quot;ウィザードを閉じる&quot;,
+	statusDoingImport: &quot;tidderlを取り込み中&quot;,
+	statusDoneImport: &quot;全てのtiddlerを取り込みました&quot;,
+	systemServerNamePattern: &quot;%1 / %2&quot;,
+	systemServerNamePatternNoWorkspace: &quot;%1&quot;,
+	confirmOverwriteSaveTiddler: &quot;'%0' というtiddlerは既に存在します。'OK'で上書きします。'キャンセル'で変更しません。&quot;,
+	serverSaveTemplate: &quot;|''種別:''|%0|\n|''URL:''|%1|\n|''ワークスペース:''|%2|\n\nこのtiddlerはこのサーバーの詳細情報を記録するために自動的に作成されました&quot;,
+	serverSaveModifier: &quot;(System)&quot;,
+	listViewTemplate: {
+		columns: [
+			{name: 'Selected', field: 'Selected', rowName: 'title', type: 'Selector'},
+			{name: 'Tiddler', field: 'tiddler', title: &quot;Tiddler&quot;, type: 'Tiddler'},
+			{name: 'Size', field: 'size', tiddlerLink: 'size', title: &quot;サイズ&quot;, type: 'Size'},
+			{name: 'Tags', field: 'tags', title: &quot;タグ&quot;, type: 'Tags'}
+			],
+		rowClasses: [
+			]}
+	});
+
+merge(config.macros.upgrade,{
+	wizardTitle: &quot;TiddlyWiki本体のアップグレード&quot;,
+	step1Title: &quot;このTiddlyWikiを最新版へ更新（あるいは修復）&quot;,
+	step1Html: &quot;TiddlyWiki本体のバージョンを &lt;a href='%0' class='externalLink' target='_blank'&gt;%1&lt;/a&gt; から最新版に更新しようとしています。この更新をしてもあなたの作成したデータが削除されることはありません。&lt;br&gt;&lt;br&gt;なお、本体をアップデートすることで旧プラグインの動作に支障が出る可能性があります。もし更新後の動作に問題が生じたときは、次のサイトを参照してください。&lt;a href='http://www.tiddlywiki.org/wiki/CoreUpgrades' class='externalLink' target='_blank'&gt;http://www.tiddlywiki.org/wiki/CoreUpgrades&lt;/a&gt;&quot;,
+	errorCantUpgrade: &quot;このTiddlyWikiを更新できませんでした。ローカルに保存したファイルにしか、TiddlyWikiの更新はできません。&quot;,
+	errorNotSaved: &quot;更新を行う前にまずファイルを保存してください。&quot;,
+	step2Title: &quot;更新作業の詳細を確認&quot;,
+	step2Html_downgrade: &quot;TiddlyWikiのバージョンを %0 から %1 へダウングレードしようとしています。&lt;br&gt;&lt;br&gt;TiddlyWiki本体を旧バージョンにダウングレードすることは推奨されません。&quot;,
+	step2Html_restore: &quot;このTiddlyWikiはすでに最新版(%0)です。&lt;br&gt;&lt;br&gt;もちろんTiddlyWiki本体が破損していたときなどのために、このまま更新を継続することもできます。&quot;,
+	step2Html_upgrade: &quot;TiddlyWikiのバージョンを %0 から %1 に更新しようとしています。&quot;,
+	upgradeLabel: &quot;更新&quot;,
+	upgradePrompt: &quot;更新処理の準備&quot;,
+	statusPreparingBackup: &quot;バックアップの準備中&quot;,
+	statusSavingBackup: &quot;バックアップファイル保存中&quot;,
+	errorSavingBackup: &quot;バックアップファイルの保存中にエラーが発生しました&quot;,
+	statusLoadingCore: &quot;本体プログラムを読み込み中&quot;,
+	errorLoadingCore: &quot;本体プログラムの読み込み中にエラーが発生しました&quot;,
+	errorCoreFormat: &quot;新しいプログラムにエラーが発生しました&quot;,
+	statusSavingCore: &quot;本体プログラムの保存中&quot;,
+	statusReloadingCore: &quot;本体プログラムのリロード中&quot;,
+	startLabel: &quot;開始&quot;,
+	startPrompt: &quot;更新処理を開始する&quot;,
+	cancelLabel: &quot;キャンセル&quot;,
+	cancelPrompt: &quot;更新処理を中断する&quot;,
+	step3Title: &quot;更新処理を中断&quot;,
+	step3Html: &quot;更新処理を中断しました&quot;
+	});
+
+merge(config.macros.sync,{
+	listViewTemplate: {
+		columns: [
+			{name: 'Selected', field: 'selected', rowName: 'title', type: 'Selector'},
+			{name: 'Tiddler', field: 'tiddler', title: &quot;Tiddler&quot;, type: 'Tiddler'},
+			{name: 'Server Type', field: 'serverType', title: &quot;種別&quot;, type: 'String'},
+			{name: 'Server Host', field: 'serverHost', title: &quot;サーバーホスト&quot;, type: 'String'},
+			{name: 'Server Workspace', field: 'serverWorkspace', title: &quot;ワークスペース&quot;, type: 'String'},
+			{name: 'Status', field: 'status', title: &quot;同期ステータス&quot;, type: 'String'},
+			{name: 'Server URL', field: 'serverUrl', title: &quot;サーバーURL&quot;, text: &quot;開く&quot;, type: 'Link'}
+			],
+		rowClasses: [
+			],
+		buttons: [
+			{caption: &quot;これらのtiddlerを同期&quot;, name: 'sync'}
+			]},
+	wizardTitle: &quot;外部サーバーやファイルとの同期&quot;,
+	step1Title: &quot;同期したいtiddlerを選択してください&quot;,
+	step1Html: &quot;&lt;input type='hidden' name='markList'&gt;&lt;/input&gt;&quot;, // DO NOT TRANSLATE
+	syncLabel: &quot;同期&quot;,
+	syncPrompt: &quot;各tiddlerを同期します&quot;,
+	hasChanged: &quot;ローカル側変更あり&quot;,
+	hasNotChanged: &quot;ローカル側変更なし&quot;,
+	syncStatusList: {
+		none: {text: &quot;...&quot;, display:null, className:'notChanged'},
+		changedServer: {text: &quot;サーバー側で変更あり&quot;, display:null, className:'changedServer'},
+		changedLocally: {text: &quot;ローカル側で変更あり&quot;, display:null, className:'changedLocally'},
+		changedBoth: {text: &quot;双方で変更あり&quot;, display:null, className:'changedBoth'},
+		notFound: {text: &quot;サーバーに見つかりません&quot;, display:null, className:'notFound'},
+		putToServer: {text: &quot;更新をサーバーに保存しました&quot;, display:null, className:'putToServer'},
+		gotFromServer: {text: &quot;サーバーから更新を取得しました&quot;, display:null, className:'gotFromServer'}
+		}
+	});
+
+merge(config.commands.closeTiddler,{
+	text: &quot;閉じる&quot;,
+	tooltip: &quot;このtiddlerを閉じます&quot;});
+
+merge(config.commands.closeOthers,{
+	text: &quot;他を閉じる&quot;,
+	tooltip: &quot;他の全てのtiddlerを閉じます&quot;});
+
+merge(config.commands.editTiddler,{
+	text: &quot;編集&quot;,
+	tooltip: &quot;このtiddlerを編集します&quot;,
+	readOnlyText: &quot;閲覧&quot;,
+	readOnlyTooltip: &quot;このtiddlerのソースを表示します&quot;});
+
+merge(config.commands.saveTiddler,{
+	text: &quot;確定&quot;,
+	tooltip: &quot;このtiddlerへの変更を保存します&quot;});
+
+merge(config.commands.cancelTiddler,{
+	text: &quot;キャンセル&quot;,
+	tooltip: &quot;このtiddlerへの変更を破棄します&quot;,
+	warning: &quot;本当に '%0' の変更を破棄して良いですか?&quot;,
+	readOnlyText: &quot;終了&quot;,
+	readOnlyTooltip: &quot;このtiddlerを通常表示にします&quot;});
+
+merge(config.commands.deleteTiddler,{
+	text: &quot;削除&quot;,
+	tooltip: &quot;このtiddlerを削除します&quot;,
+	warning: &quot;本当に '%0' を削除して良いですか?&quot;});
+
+merge(config.commands.permalink,{
+	text: &quot;リンクURL&quot;,
+	tooltip: &quot;このtiddlerへのURLをアドレス欄に生成します&quot;});
+
+merge(config.commands.references,{
+	text: &quot;参照一覧&quot;,
+	tooltip: &quot;このtiddlerへの参照を一覧表示します&quot;,
+	popupNone: &quot;参照がありません&quot;});
+
+merge(config.commands.jump,{
+	text: &quot;ジャンプ&quot;,
+	tooltip: &quot;他に開いているtiddlerへジャンプ&quot;});
+
+merge(config.commands.syncing,{
+	text: &quot;同期&quot;,
+	tooltip: &quot;このtiddlerと外部のサーバー(ファイル)との同期を制御します&quot;,
+	currentlySyncing: &quot;&lt;div&gt;現在の同期状態&lt;br&gt;種別: &lt;span class='popupHighlight'&gt;'%0'&lt;/span&gt;&lt;br&gt;&lt;/&quot;+&quot;div&gt;&lt;div&gt;ホスト: &lt;span class='popupHighlight'&gt;%1&lt;/span&gt;&lt;/&quot;+&quot;div&gt;&lt;br&gt;&lt;div&gt;ワークスペース: &lt;span class='popupHighlight'&gt;%2&lt;/span&gt;&lt;/&quot;+&quot;div&gt;&quot;, // Note escaping of closing &lt;div&gt; tag
+	notCurrentlySyncing: &quot;同期されていません&quot;,
+	captionUnSync: &quot;このtiddlerの同期を停止&quot;,
+	chooseServer: &quot;このtiddlerを次のサーバーと同期する:&quot;,
+	currServerMarker: &quot;\u25cf &quot;,
+	notCurrServerMarker: &quot;  &quot;});
+
+merge(config.commands.fields,{
+	text: &quot;拡張情報&quot;,
+	tooltip: &quot;このtiddlerの拡張情報を表示します&quot;,
+	emptyText: &quot;このtiddlerには拡張情報がありません&quot;,
+	listViewTemplate: {
+		columns: [
+			{name: 'Field', field: 'field', title: &quot;項目&quot;, type: 'String'},
+			{name: 'Value', field: 'value', title: &quot;値&quot;, type: 'String'}
+			],
+		rowClasses: [
+			],
+		buttons: [
+			]}});
+
+merge(config.shadowTiddlers,{
+	DefaultTiddlers: &quot;[[TranslatedGettingStarted]]&quot;,
+	MainMenu: &quot;[[TranslatedGettingStarted]]\n\n\n^^~TiddlyWiki version &lt;&lt;version&gt;&gt;\n(c) 2010 [[UnaMesa|http://www.unamesa.org/]]^^&quot;,
+	TranslatedGettingStarted: &quot;この空の~TiddlyWikiを使い始めるにあたって、まずは以下のtiddlerを編集してください。:\n;SiteTitle &amp; SiteSubtitle: \n:このサイトのタイトルおよびサブタイトル。この上に表示されています。&lt;br&gt;保存後はブラウザのタイトルバーにも表示されます。\n;MainMenu: \n:メニュー。たいていは左側に表示されています。\n;DefaultTiddlers: \n:ここにtiddlerの名前が書かれていると、この TiddlyWiki を開いたときに、&lt;br&gt;そのtiddlerが初期表示されます。\nあなたの名前(編集したtiddlerに表示されます): &lt;&lt;option txtUserName&gt;&gt;&quot;,
+	SiteTitle: &quot;My TiddlyWiki&quot;,
+	SiteSubtitle: &quot;a reusable non-linear personal web notebook&quot;,
+	SiteUrl: &quot;&quot;,
+	OptionsPanel: &quot;これらの~TiddlyWikiを制御する各オプションの設定は、使用中のブラウザに保存されます。\n\n署名として使用するあなたの名前を~WikiWord形式(例 JoeBloggs)で入力してください。\n&lt;&lt;option txtUserName&gt;&gt;\n\n&lt;&lt;option chkSaveBackups&gt;&gt; バックアップを保存\n&lt;&lt;option chkAutoSave&gt;&gt; 自動保存\n&lt;&lt;option chkRegExpSearch&gt;&gt; 正規表現で検索\n&lt;&lt;option chkCaseSensitiveSearch&gt;&gt; 検索で大文字小文字を区別\n&lt;&lt;option chkAnimate&gt;&gt; アニメーション\n\n----\n詳細設定 [[TranslatedAdvancedOptions|AdvancedOptions]]&quot;,
+	SideBarOptions: '&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;newJournal &quot;YYYY年MM月DD日&quot; &quot;ジャーナル&quot;&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;オプション \u00bb&quot; &quot;TiddlyWiki の詳細設定&quot;&gt;&gt;',
+	SideBarTabs: '&lt;&lt;tabs txtMainTab &quot;時系列&quot; &quot;更新時刻の降順&quot; TabTimeline &quot;全て&quot; &quot;全てのtiddler&quot; TabAll &quot;タグ別&quot; &quot;全てのタグ&quot; TabTags &quot;その他&quot; &quot;その他の一覧&quot; TabMore&gt;&gt;',
+	TabMore: '&lt;&lt;tabs txtMoreTab &quot;未作成&quot; &quot;リンクがあるのに存在しないtiddler&quot; TabMoreMissing &quot;孤立&quot; &quot;どこからもリンクされていないtiddler&quot; TabMoreOrphans &quot;隠し&quot; &quot;隠されているtiddler&quot; TabMoreShadowed&gt;&gt;'});
+
+merge(config.annotations,{
+	AdvancedOptions: &quot;このtiddlerでは詳細オプションを設定できます&quot;,
+	ColorPalette: &quot;この隠しtiddlerで設定された各値によって、この~TiddlyWikiでの色の枠組みが規定されます。&quot;,
+	DefaultTiddlers: &quot;この隠しtiddlerに列挙された各tiddlerは、この~TiddlyWIkiを開くと同時に自動的に表示されます。&quot;,
+	EditTemplate: &quot;この隠しtiddlerにあるHTMLテンプレートは、tiddler編集中の表示方法を決定します。&quot;,
+	GettingStarted: &quot;この隠しtiddlerは基本的な使用方法を説明します。&quot;,
+	ImportTiddlers: &quot;この隠しtiddlerは他のtiddlerの取り込み機能を提供します。&quot;,
+	MainMenu: &quot;この隠しtiddlerの内容は「メインメニュー」に表示されます。画面左手に表示されます。&quot;,
+	MarkupPreHead: &quot;この隠しtiddlerの内容は、このTiddlyWikiHTMLファイルの&lt;head&gt;セクション開始直後に挿入されます。&quot;,
+	MarkupPostHead: &quot;この隠しtiddlerの内容は、このTiddlyWikiHTMLファイルの&lt;head&gt;セクション終了直前に挿入されます。&quot;,
+	MarkupPreBody: &quot;この隠しtiddlerの内容は、このTiddlyWikiHTMLファイルの&lt;body&gt;セクション開始直後に挿入されます。&quot;,
+	MarkupPostBody: &quot;この隠しtiddlerの内容は、このTiddlyWikiHTMLファイルのスクリプトブロック直後にある、&lt;body&gt;セクション終了直前に挿入されます。&quot;,
+	OptionsPanel: &quot;この隠しtiddlerの内容は、右手のサイドバー内でスライド式のオプションパネルとして表示されます。&quot;,
+	PageTemplate: &quot;この隠しtiddlerにあるHTMLテンプレートは、~TiddlyWiki全体のレイアウトを決定します。&quot;,
+	PluginManager: &quot;この隠しtiddlerはプラグインマネージャ機能を提供します。&quot;,
+	SideBarOptions: &quot;この隠しtiddlerの内容は右手のサイドバー内のオプションパネルとして表示されます。&quot;,
+	SideBarTabs: &quot;この隠しtiddlerの内容は右手のサイドバー内にタブパネルとして表示されます。&quot;,
+	SiteSubtitle: &quot;この隠しtiddlerはページのサブタイトルとして利用されます。&quot;,
+	SiteTitle: &quot;この隠しtiddlerはページのメインタイトルとして利用されます。&quot;,
+	SiteUrl: &quot;この隠しtiddlerには、このTiddlyWikiを公開する際のURLを指定する必要があります。&quot;,
+	StyleSheetColors: &quot;この隠しtiddlerはページ内各要素の色に関するCSSを規定します。このtiddlerを編集しないでください。色を修正するには代わりに StyleSheet 隠しtiddler を編集してください。&quot;,
+	StyleSheet: &quot;この隠しtiddlerはカスタムCSSを規定します。&quot;,
+	StyleSheetLayout: &quot;この隠しtiddlerはページ内各要素のレイアウトに関するCSSを規定します。このtiddlerを編集しないでください。レイアウトを修正するには代わりに StyleSheet 隠しtiddler を編集してください。&quot;,
+	StyleSheetLocale: &quot;この隠しtiddlerはページ内各要素の翻訳ロケールに関するCSSを規定します。&quot;,
+	StyleSheetPrint: &quot;この隠しtiddlerは印刷に関するCSSを規定します。&quot;,
+	TabAll: &quot;この隠しtiddlerの内容は右手のサイドバー内「全て」タブに表示されます。&quot;,
+	TabMore: &quot;この隠しtiddlerの内容は右手のサイドバー内「その他」タブに表示されます。&quot;,
+	TabMoreMissing: &quot;この隠しtiddlerの内容は右手のサイドバー内「未作成」タブに表示されます。&quot;,
+	TabMoreOrphans: &quot;この隠しtiddlerの内容は右手のサイドバー内「孤立」タブに表示されます。&quot;,
+	TabMoreShadowed: &quot;この隠しtiddlerの内容は右手のサイドバー内「隠し」タブに表示されます。&quot;,
+	TabTags: &quot;この隠しtiddlerの内容は右手のサイドバー内「タグ別」タブに表示されます。&quot;,
+	TabTimeline: &quot;この隠しtiddlerの内容は右手のサイドバー内「時系列」タブに表示されます。&quot;,
+	ToolbarCommands: &quot;この隠しtiddlerはtiddlerツールバーにどのようなコマンドを表示するかを決定します。&quot;,
+	ViewTemplate: &quot;この隠しtiddlerにあるHTMLテンプレートは、各tiddlerの表示方法を決定します。&quot;
+	});
+//}}}</pre>
+</div>
+<div title="LocalTweetPlugin" modifier="ongaeshi" created="201007031746" modified="201007151702" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#LocalTweetPlugin" server.page.revision="201007151702">
+<pre>/***
+|''Name''|LocalTweetPlugin|
+|''Description''|Tweet to TiddlyWiki|
+|''Author''|ongaeshi|
+|''Plugin last updated''|2010/07/15 01:34|
+|''Version''|1.0.5|
+|''SHA-1 hash''||
+|''Min. TiddlyWiki version required''|2.0.11|
+|''Dependencies''||
+|''Size''|10.0KB|
+|''License''|http://www.opensource.org/licenses/mit-license.php|
+|''URL''|http://ongaeshi.tiddlyspot.com/#LocalTweetPlugin|
+!Description
+You can tweet to TiddlyWiki.
+!Notes
+The tweet macro can be put only by one per tiddler 1.
+!Examples
+&lt;&lt;tweet&gt;&gt;
+@@color(red):fiz!!@@ buzz!! @@fiz@@ @@bgcolor(#000000):color(#00FFFF):buzz!!@@
+~~@@color(gray):2010/07/04 1:30@@~~
+----
+--good bye.--
+~~@@color(gray):2010/07/04 0:21@@~~
+----
+''@@color(red):hello.@@''
+~~@@color(gray):2010/07/03 8:30@@~~
+----
+!Usage
+{{{
+&lt;&lt;tweet&gt;&gt;
+}}}
+!Revision History
+|2010-07-15|v1.0.5|It corresponds because the mutter disappears with &quot;close&quot; button. |
+|2010-07-14|v1.0.4|Warning is put out if the tweet of the ''&quot;unsaved&quot;'' in the text area. &lt;br&gt;When enter from the right when entering from the under only below, it is possible to expand only right.&lt;br&gt;Bug fix.|
+|2010-07-08|v1.0.3|Parameter adjustment.|
+|2010-07-07|v1.0.2|If Tweet is done once, the bug into which the cursor is not changed is corrected.|
+|2010-07-06|v1.0.1|TextArea is resized possible.|
+|2010-07-04|v1.0.0|1st version.|
+!To Do
+&lt;...&gt;
+!Code
+***/
+//{{{
+
+// tweetマクロ本体
+config.macros.tweet = {
+    // つぶやき用のフォームを作成する
+    handler: function(place, macroName, params, wikifier, paramString, tiddler) {
+        var div = document.createElement(&quot;div&quot;);
+        div.setAttribute(&quot;style&quot;, &quot;position: relative; width: 550px&quot;)
+        place.appendChild(div);
+
+        var h3 = document.createElement(&quot;h3&quot;);
+        h3.appendChild(document.createTextNode(&quot;What are you doing?&quot;));
+
+        h3.setAttribute(&quot;style&quot;, &quot;color: #ffffff; background-color: #35CDFF&quot;);
+        div.appendChild(h3);
+
+        var textarea = document.createElement(&quot;textarea&quot;);
+        textarea.name = &quot;tweet_textarea&quot;;
+        textarea.cols = 65;
+        textarea.rows = 2;
+        textarea.tiddler = tiddler;
+        div.appendChild(textarea);
+        new this.TweetTextAreaMovable(textarea);
+        
+        var div2 = document.createElement(&quot;div&quot;);
+        div2.setAttribute(&quot;style&quot;, &quot;float: right; position: relative; width: 30%;&quot;);
+	var input = document.createElement(&quot;input&quot;);
+	input.setAttribute(&quot;type&quot;,&quot;submit&quot;);
+	input.setAttribute(&quot;value&quot;,&quot;tweet&quot;);
+	input.setAttribute(&quot;style&quot;,&quot;width: 100%;&quot;);
+        input.onclick = this.tweetOnClick;
+        input.tiddler = tiddler;
+        input.textarea = textarea;
+        input.matchStart = wikifier.matchStart;
+        div2.appendChild(input);
+        div.appendChild(div2);
+    },
+
+    // submitボタンが押されたらつぶやきを追記
+    //   thisには押された対象が渡される、つまりこの場合は[submit]ボタン
+    //   thisの省略は出来ない、エラーになる
+    tweetOnClick: function() {  
+        var text = this.textarea.value;
+
+        if (text == &quot;&quot;)
+            return;
+
+        var tweetText = &quot;&quot;;
+        tweetText += text + config.macros.tweet.insertLineFeed(text);
+        tweetText += config.macros.tweet.currentTimeString();
+        tweetText += &quot;----\n&quot;;
+
+        // &lt;&lt;tweet&gt;&gt;マクロの直下に挿入
+        var tidText = this.tiddler.text.substr(this.matchStart);
+        var pos = tidText.search(&quot;&lt;&lt;tweet&gt;&gt;.*\n&quot;);
+        pos = tidText.indexOf(&quot;\n&quot;, pos);
+        this.tiddler.text = this.tiddler.text.substr(0, this.matchStart) + tidText.substr(0, pos + 1) + tweetText + tidText.substr(pos + 1);
+
+        // 表示を更新
+	if (!story.isDirty(this.tiddler.title)) {
+            // tiddlerの表示を更新する
+            story.refreshTiddler(this.tiddler.title,null,true);
+            story.saveTiddler(this.tiddler.title,false);
+
+            // つぶやいた内容を右上にも表示させる
+            displayMessage(text);
+        }
+    },
+
+    // 最後が改行でなければ改行を追加
+    insertLineFeed: function(text) {
+        if (text.substr(text.length - 1) != &quot;\n&quot;)
+            return &quot;\n&quot;;
+        else
+            return &quot;&quot;;
+    },
+
+    // 現在時間の文字列を作成
+    currentTimeString: function() {
+        var date = new Date();
+
+        var month = date.getMonth() + 1;
+        if (month &lt;= 9)
+            month = &quot;0&quot; + month;
+
+        var day = date.getDate();
+        if (day &lt;= 9)
+            day = &quot;0&quot; + day;
+
+        var minutes = date.getMinutes();
+        if (minutes &lt;= 9)
+            minutes = &quot;0&quot; + minutes;
+        
+        var str = date.getFullYear() + &quot;/&quot; + month + &quot;/&quot; + day + &quot; &quot; + date.getHours() + &quot;:&quot; + minutes;
+
+        return &quot;~~@@color(gray):&quot; + str + &quot;@@~~&quot; + &quot;\n&quot;;
+    }
+};
+
+// ローカル関数群、関数で包み込んで名前空間を汚さないようにする
+(function() {
+var TweetTextAreaMovable = function(elm) {
+    OFFSET_X_MIN = 0;
+    OFFSET_X_MAX = 24;
+
+    OFFSET_Y_MIN = 0;
+    OFFSET_Y_MAX = 18;
+
+    WIDTH_MIN = 400;
+    HEIGHT_MIN = 25;
+
+    MOVE_NONE = -1;
+    MOVE_RIGHT = 0;
+    MOVE_UNDER = 1;
+    MOVE_RIGHTUNDER = 2;
+
+    this.elm_ = elm;
+    this.moveDir_ = MOVE_NONE;
+    this.moveOffset_ = {x:0, y:0};
+    this.rect = new Rect(this.elm_);
+    
+    this.inintialize(elm);
+}
+
+TweetTextAreaMovable.prototype = {
+    inintialize: function(elm) {
+        var self = this;
+        
+        addEvent(elm, 'mousedown', function (e) {
+            var isU = self.isUnderMovable(e);
+            var isR = self.isRightMovable(e);
+            
+            if (isU || isR) {
+                if (isR &amp;&amp; isU)
+                    self.moveDir_ = MOVE_RIGHTUNDER;
+                else if (isR)
+                    self.moveDir_ = MOVE_RIGHT;
+                else
+                    self.moveDir_ = MOVE_UNDER;
+                var page = mousePage(e);
+                self.moveOffset_.x = self.rect.right() - page.x;
+                self.moveOffset_.y = self.rect.bottom() - page.y;
+            }
+        });
+
+        addEvent(document.body, 'mouseup', function (e) {
+            if (self.moveDir_ != MOVE_NONE)
+                self.moveDir_ = MOVE_NONE;
+
+            self._cursorUpdate(e);
+        });
+
+        addEvent(document.body, 'mousemove', function (e) {
+            if (self.moveDir_ != MOVE_NONE)
+                self.doResize(e);
+            
+            self._cursorUpdate(e);
+        });
+    },
+    
+    isRightUnderMovable: function(e) {
+        return this.isUnderMovable(e) &amp;&amp; this.isRightMovable(e);
+    },
+
+    isUnderMovable: function(e) {
+        var page = mousePage(e);
+
+        if (this.rect.bottom() - OFFSET_Y_MAX &lt; page.y &amp;&amp; page.y &lt; this.rect.bottom() - OFFSET_Y_MIN) {
+            return true;
+        }
+
+        return false;
+    },
+    
+    isRightMovable: function(e) {
+        var page = mousePage(e);
+
+        if (this.rect.right() - OFFSET_X_MAX &lt; page.x &amp;&amp; page.x &lt; this.rect.right() - OFFSET_X_MIN) {
+            return true;
+        }
+
+        return false;
+    },
+
+    doResize: function(e) {
+        var page = mousePage(e);
+        var width  = page.x - this.rect.left() + this.moveOffset_.x;
+        var height = page.y - this.rect.top() + this.moveOffset_.y;
+
+        if (width  &lt; WIDTH_MIN) width  = WIDTH_MIN;
+        if (height &lt; HEIGHT_MIN) height = HEIGHT_MIN;
+
+        if (this.moveDir_ == MOVE_UNDER || this.moveDir_ == MOVE_RIGHTUNDER)
+            this.elm_.style.height = height + 'px';
+        if (this.moveDir_ == MOVE_RIGHT || this.moveDir_ == MOVE_RIGHTUNDER)
+            this.elm_.style.width  = width  + 'px';
+    },
+
+    _cursorUpdate: function(e) {
+        var cursorKind = this._calcCursorKind(e);
+
+        if (cursorKind == null) {
+            if (this.elm_.style.cursor == 'se-resize' ||
+                this.elm_.style.cursor == 's-resize' ||
+                this.elm_.style.cursor == 'e-resize')
+                this.elm_.style.cursor = null;
+
+        } else {
+            if (this.elm_.style.cursor != cursorKind)
+                this.elm_.style.cursor = cursorKind;
+        }
+    },
+
+    _calcCursorKind: function(e) {
+        if (this.moveDir_ == MOVE_RIGHTUNDER)
+            return 'se-resize';
+        if (this.moveDir_ == MOVE_UNDER)
+            return 's-resize';
+        if (this.moveDir_ == MOVE_RIGHT)
+            return 'e-resize';
+
+        if (this.isRightUnderMovable(e))
+            return 'se-resize';
+        if (this.isUnderMovable(e))
+            return 's-resize';
+        if (this.isRightMovable(e))
+            return 'e-resize';
+
+        return null;
+    },
+}
+
+var addEvent = (window.addEventListener) ?
+   (function(elm, type, event) {
+      elm.addEventListener(type, event, false);
+   }) : (window.attachEvent) ?
+   (function(elm, type, event) {
+      elm.attachEvent('on'+type, event);
+   }) :
+   (function(elm, type, event) {
+      elm['on'+type] = event;
+   }) ;
+
+var Rect = function(elm) {
+    this.elm_ = elm;
+}
+
+Rect.prototype = {
+    top: function() { return this._offset('Top', this.elm_); },
+    bottom: function() { return this.top() + this.elm_.offsetHeight; },
+    left: function() { return this._offset('Left', this.elm_); },
+    right: function() { return this.left() + this.elm_.offsetWidth; },
+
+    width: function() { return this.elm_.width; },
+    height: function() { return this.elm_.width; },
+
+   _offset: function(prop, elm) {
+      if(!elm.offsetParent || elm.offsetParent.tagName.toLowerCase() == &quot;body&quot;)
+         return elm['offset'+prop];
+      else
+         return elm['offset'+prop]+ this._offset(prop, elm.offsetParent);
+   }
+}
+
+function mousePage(e)
+{
+    var pos = {};
+    
+    if (document.all) {
+        pos.x = event.x + (document.body.scrollLeft || document.documentElement.scrollLeft);
+        pos.y = event.y + (document.body.scrollTop  || document.documentElement.scrollTop);
+        return pos;
+    } else {
+        pos.x = e.pageX;
+        pos.y = e.pageY;
+        return pos;
+    }
+}
+        
+// あるオブジェクトを複製する。
+// 複製元となったオブジェクトは__super__で参照可能。
+function clone(s) 
+{
+    function f(){};
+    f.prototype = s;
+    f.prototype.__super__ = s;
+    return new f();
+}
+
+// 指定tiddlerが編集中か？
+function isTweetEditing(title) {
+    var elems = document.getElementsByName(&quot;tweet_textarea&quot;);
+
+    for (var i = 0; i &lt; elems.length; i++) {
+        var textarea = elems.item(i);
+
+        if (title == textarea.tiddler.title &amp;&amp;
+            textarea.value != &quot;&quot;) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// 編集コマンドをカスタマイズする
+var tweetEditTiddler = clone(config.commands.editTiddler);
+
+tweetEditTiddler.handler = function(event, src, title) {
+    if (!isTweetEditing(title))
+        this.__super__.handler(event, src, title);
+    else
+        alert(&quot;The tweet of the \&quot;unsaved\&quot; in the text area.\nPlease push the [tweet] button or empty the text area.&quot;);
+}
+
+config.commands.editTiddler = tweetEditTiddler;
+
+// 閉じるコマンドをカスタマイズする
+var tweetCloseTiddler = clone(config.commands.closeTiddler);
+
+tweetCloseTiddler.handler = function(event, src, title) {
+    if (!isTweetEditing(title))
+        this.__super__.handler(event, src, title);
+    else
+        alert(&quot;The tweet of the \&quot;unsaved\&quot; in the text area.\nPlease push the [tweet] button or empty the text area.&quot;);
+}
+
+config.commands.closeTiddler = tweetCloseTiddler;
+
+// 他を閉じるコマンドをカスタマイズする
+var tweetCloseOthers = clone(config.commands.closeOthers);
+
+tweetCloseOthers.handler = function(event, src, title) {
+    var exclude = title;
+
+    clearMessage();
+    story.forEachTiddler(function(title,element) {
+	if(!isTweetEditing(title) &amp;&amp; (title != exclude) &amp;&amp; element.getAttribute(&quot;dirty&quot;) != &quot;true&quot;)
+	    story.closeTiddler(title);
+    });
+    window.scrollTo(0,ensureVisible(story.container));
+}
+
+config.commands.closeOthers = tweetCloseOthers;
+
+// マクロ内で使用するデータのみ名前空間に接続する
+var ns = config.macros.tweet;
+ns.TweetTextAreaMovable = TweetTextAreaMovable;
+})();
+
+//}}}
+</pre>
 </div>
 <div title="MainMenu" created="201011290209" modified="201011290216" changecount="8">
 <pre>[[スタート|Startup]] [[つぶやき|Tweet - New]] [[巡回]]</pre>
@@ -585,6 +1591,202 @@ font-size: .9em;
 
 /*}}}*/
 </pre>
+</div>
+<div title="TiddlersBarPlugin" modifier="Pascal" created="200708071235" modified="200801181510" tags="VisualTW systemConfig Tools" server.type="file" server.host="visualtw.ouvaton.org/VisualTW.html" server.page.revision="200801181510" label="TiddlersBar">
+<pre>/***
+|''Name:''|TiddlersBarPlugin|
+|''Description:''|A bar to switch between tiddlers through tabs (like browser tabs bar).|
+|''Version:''|1.2.5|
+|''Date:''|Jan 18,2008|
+|''Source:''|http://visualtw.ouvaton.org/VisualTW.html|
+|''Author:''|Pascal Collin|
+|''License:''|[[BSD open source license|License]]|
+|''~CoreVersion:''|2.1.0|
+|''Browser:''|Firefox 2.0; InternetExplorer 6.0, others|
+!Demos
+On [[homepage|http://visualtw.ouvaton.org/VisualTW.html]], open several tiddlers to use the tabs bar.
+!Installation
+#import this tiddler from [[homepage|http://visualtw.ouvaton.org/VisualTW.html]] (tagged as systemConfig)
+#save and reload
+#''if you're using a custom [[PageTemplate]]'', add {{{&lt;div id='tiddlersBar' refresh='none' ondblclick='config.macros.tiddlersBar.onTiddlersBarAction(event)'&gt;&lt;/div&gt;}}} before {{{&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;}}}
+#optionally, adjust StyleSheetTiddlersBar
+!Tips
+*Doubleclick on the tiddlers bar (where there is no tab) create a new tiddler.
+*Tabs include a button to close {{{x}}} or save {{{!}}} their tiddler.
+*By default, click on the current tab close all others tiddlers.
+!Configuration options 
+&lt;&lt;option chkDisableTabsBar&gt;&gt; Disable the tabs bar (to print, by example).
+&lt;&lt;option chkHideTabsBarWhenSingleTab &gt;&gt; Automatically hide the tabs bar when only one tiddler is displayed. 
+&lt;&lt;option txtSelectedTiddlerTabButton&gt;&gt; ''selected'' tab command button.
+&lt;&lt;option txtPreviousTabKey&gt;&gt; previous tab access key.
+&lt;&lt;option txtNextTabKey&gt;&gt; next tab access key.
+!Code
+***/
+//{{{
+config.options.chkDisableTabsBar = config.options.chkDisableTabsBar ? config.options.chkDisableTabsBar : false;
+config.options.chkHideTabsBarWhenSingleTab  = config.options.chkHideTabsBarWhenSingleTab  ? config.options.chkHideTabsBarWhenSingleTab  : false;
+config.options.txtSelectedTiddlerTabButton = config.options.txtSelectedTiddlerTabButton ? config.options.txtSelectedTiddlerTabButton : &quot;closeOthers&quot;;
+config.options.txtPreviousTabKey = config.options.txtPreviousTabKey ? config.options.txtPreviousTabKey : &quot;&quot;;
+config.options.txtNextTabKey = config.options.txtNextTabKey ? config.options.txtNextTabKey : &quot;&quot;;
+config.macros.tiddlersBar = {
+	tooltip : &quot;see &quot;,
+	tooltipClose : &quot;click here to close this tab&quot;,
+	tooltipSave : &quot;click here to save this tab&quot;,
+	promptRename : &quot;Enter tiddler new name&quot;,
+	currentTiddler : &quot;&quot;,
+	previousState : false,
+	previousKey : config.options.txtPreviousTabKey,
+	nextKey : config.options.txtNextTabKey,	
+	tabsAnimationSource : null, //use document.getElementById(&quot;tiddlerDisplay&quot;) if you need animation on tab switching.
+	handler: function(place,macroName,params) {
+		var previous = null;
+		if (config.macros.tiddlersBar.isShown())
+			story.forEachTiddler(function(title,e){
+				if (title==config.macros.tiddlersBar.currentTiddler){
+					var d = createTiddlyElement(null,&quot;span&quot;,null,&quot;tab tabSelected&quot;);
+					config.macros.tiddlersBar.createActiveTabButton(d,title);
+					if (previous &amp;&amp; config.macros.tiddlersBar.previousKey) previous.setAttribute(&quot;accessKey&quot;,config.macros.tiddlersBar.nextKey);
+					previous = &quot;active&quot;;
+				}
+				else {
+					var d = createTiddlyElement(place,&quot;span&quot;,null,&quot;tab tabUnselected&quot;);
+					var btn = createTiddlyButton(d,title,config.macros.tiddlersBar.tooltip + title,config.macros.tiddlersBar.onSelectTab);
+					btn.setAttribute(&quot;tiddler&quot;, title);
+					if (previous==&quot;active&quot; &amp;&amp; config.macros.tiddlersBar.nextKey) btn.setAttribute(&quot;accessKey&quot;,config.macros.tiddlersBar.previousKey);
+					previous=btn;
+				}
+				var isDirty =story.isDirty(title);
+				var c = createTiddlyButton(d,isDirty ?&quot;!&quot;:&quot;x&quot;,isDirty?config.macros.tiddlersBar.tooltipSave:config.macros.tiddlersBar.tooltipClose, isDirty ? config.macros.tiddlersBar.onTabSave : config.macros.tiddlersBar.onTabClose,&quot;tabButton&quot;);
+				c.setAttribute(&quot;tiddler&quot;, title);
+				if (place.childNodes) {
+					place.insertBefore(document.createTextNode(&quot; &quot;),place.firstChild); // to allow break line here when many tiddlers are open
+					place.insertBefore(d,place.firstChild); 
+				}
+				else place.appendChild(d);
+			})
+	}, 
+	refresh: function(place,params){
+		removeChildren(place);
+		config.macros.tiddlersBar.handler(place,&quot;tiddlersBar&quot;,params);
+		if (config.macros.tiddlersBar.previousState!=config.macros.tiddlersBar.isShown()) {
+			story.refreshAllTiddlers();
+			if (config.macros.tiddlersBar.previousState) story.forEachTiddler(function(t,e){e.style.display=&quot;&quot;;});
+			config.macros.tiddlersBar.previousState = !config.macros.tiddlersBar.previousState;
+		}
+	},
+	isShown : function(){
+		if (config.options.chkDisableTabsBar) return false;
+		if (!config.options.chkHideTabsBarWhenSingleTab) return true;
+		var cpt=0;
+		story.forEachTiddler(function(){cpt++});
+		return (cpt&gt;1);
+	},
+	selectNextTab : function(){  //used when the current tab is closed (to select another tab)
+		var previous=&quot;&quot;;
+		story.forEachTiddler(function(title){
+			if (!config.macros.tiddlersBar.currentTiddler) {
+				story.displayTiddler(null,title);
+				return;
+			}
+			if (title==config.macros.tiddlersBar.currentTiddler) {
+				if (previous) {
+					story.displayTiddler(null,previous);
+					return;
+				}
+				else config.macros.tiddlersBar.currentTiddler=&quot;&quot;; 	// so next tab will be selected
+			}
+			else previous=title;
+			});		
+	},
+	onSelectTab : function(e){
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (t) story.displayTiddler(null,t);
+		return false;
+	},
+	onTabClose : function(e){
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (t) {
+			if(story.hasChanges(t) &amp;&amp; !readOnly) {
+				if(!confirm(config.commands.cancelTiddler.warning.format([t])))
+				return false;
+			}
+			story.closeTiddler(t);
+		}
+		return false;
+	},
+	onTabSave : function(e) {
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (!e) e=window.event;
+		if (t) config.commands.saveTiddler.handler(e,null,t);
+		return false;
+	},
+	onSelectedTabButtonClick : function(event,src,title) {
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (!event) event=window.event;
+		if (t &amp;&amp; config.options.txtSelectedTiddlerTabButton &amp;&amp; config.commands[config.options.txtSelectedTiddlerTabButton])
+			config.commands[config.options.txtSelectedTiddlerTabButton].handler(event, src, t);
+		return false;
+	},
+	onTiddlersBarAction: function(event) {
+		var source = event.target ? event.target.id : event.srcElement.id; // FF uses target and IE uses srcElement;
+		if (source==&quot;tiddlersBar&quot;) story.displayTiddler(null,'New Tiddler',DEFAULT_EDIT_TEMPLATE,false,null,null);
+	},
+	createActiveTabButton : function(place,title) {
+		if (config.options.txtSelectedTiddlerTabButton &amp;&amp; config.commands[config.options.txtSelectedTiddlerTabButton]) {
+			var btn = createTiddlyButton(place, title, config.commands[config.options.txtSelectedTiddlerTabButton].tooltip ,config.macros.tiddlersBar.onSelectedTabButtonClick);
+			btn.setAttribute(&quot;tiddler&quot;, title);
+		}
+		else
+			createTiddlyText(place,title);
+	}
+}
+
+story.coreCloseTiddler = story.coreCloseTiddler? story.coreCloseTiddler : story.closeTiddler;
+story.coreDisplayTiddler = story.coreDisplayTiddler ? story.coreDisplayTiddler : story.displayTiddler;
+
+story.closeTiddler = function(title,animate,unused) {
+	if (title==config.macros.tiddlersBar.currentTiddler)
+		config.macros.tiddlersBar.selectNextTab();
+	story.coreCloseTiddler(title,false,unused); //disable animation to get it closed before calling tiddlersBar.refresh
+	var e=document.getElementById(&quot;tiddlersBar&quot;);
+	if (e) config.macros.tiddlersBar.refresh(e,null);
+}
+
+story.displayTiddler = function(srcElement,tiddler,template,animate,unused,customFields,toggle){
+	story.coreDisplayTiddler(config.macros.tiddlersBar.tabsAnimationSource,tiddler,template,animate,unused,customFields,toggle);
+	var title = (tiddler instanceof Tiddler)? tiddler.title : tiddler;  
+	if (config.macros.tiddlersBar.isShown()) {
+		story.forEachTiddler(function(t,e){
+			if (t!=title) e.style.display=&quot;none&quot;;
+			else e.style.display=&quot;&quot;;
+		})
+		config.macros.tiddlersBar.currentTiddler=title;
+	}
+	var e=document.getElementById(&quot;tiddlersBar&quot;);
+	if (e) config.macros.tiddlersBar.refresh(e,null);
+}
+
+var coreRefreshPageTemplate = coreRefreshPageTemplate ? coreRefreshPageTemplate : refreshPageTemplate;
+refreshPageTemplate = function(title) {
+	coreRefreshPageTemplate(title);
+	if (config.macros.tiddlersBar) config.macros.tiddlersBar.refresh(document.getElementById(&quot;tiddlersBar&quot;));
+}
+
+ensureVisible=function (e) {return 0} //disable bottom scrolling (not useful now)
+
+config.shadowTiddlers.StyleSheetTiddlersBar = &quot;/*{{{*/\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar .button {border:0}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar .tab {white-space:nowrap}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar {padding : 1em 0.5em 2px 0.5em}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;.tabUnselected .tabButton, .tabSelected .tabButton {padding : 0 2px 0 2px; margin: 0 0 0 4px;}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;.tiddler, .tabContents {border:1px [[ColorPalette::TertiaryPale]] solid;}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar +=&quot;/*}}}*/&quot;;
+store.addNotification(&quot;StyleSheetTiddlersBar&quot;, refreshStyles);
+
+config.refreshers.none = function(){return true;}
+config.shadowTiddlers.PageTemplate=config.shadowTiddlers.PageTemplate.replace(/&lt;div id='tiddlerDisplay'&gt;&lt;\/div&gt;/m,&quot;&lt;div id='tiddlersBar' refresh='none' ondblclick='config.macros.tiddlersBar.onTiddlersBarAction(event)'&gt;&lt;/div&gt;\n&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;&quot;);
+
+//}}}</pre>
 </div>
 <div title="Tweet - New" created="201011290216" changecount="1">
 <pre>&lt;&lt;tweets&gt;&gt;</pre>
