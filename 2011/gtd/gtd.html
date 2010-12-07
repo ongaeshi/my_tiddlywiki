@@ -518,6 +518,107 @@ Also see [[AdvancedOptions]]</pre>
 
 This tiddler was automatically created to record the details of this server</pre>
 </div>
+<div title="ClickTodoPlugin" modifier="YourName" created="201007101502" modified="201007120147" tags="systemConfig" creator="ongaeshi" server.type="file" server.host="ongaeshi.tiddlyspot.com/#ClickTodoPlugin" server.page.revision="201007120147">
+<pre>/***
+|''Name''|ClickTodoPlugin|
+|''Description''|TODO plugin that can be clicked. |
+|''Author''|ongaeshi|
+|''Plugin last updated''|2010/07/10 23:35|
+|''Version''|1.0.0|
+|''SHA-1 hash''||
+|''Min. TiddlyWiki version required''|2.5.0|
+|''Dependencies''||
+|''Size''|3.0KB|
+|''License''|http://www.opensource.org/licenses/mit-license.php|
+|''URL''|http://ongaeshi.tiddlyspot.com/#ClickTodoPlugin|
+!Description
+TODO plugin that can be clicked. 
+!Notes
+!Examples
+&lt;&lt;todo2&gt;&gt; It changes into DONE if it clicks. 
+&lt;&lt;todo2 0&gt;&gt; It changes into TODO if it clicks. 
+!Usage
+{{{
+&lt;&lt;todo2&gt;&gt; Todo item.
+&lt;&lt;todo2 0&gt;&gt; Done item.
+}}}
+!Revision History
+|2010-07-10|v1.0.0|1st version.|
+!To Do
+&lt;...&gt;
+!Code
+***/
+//{{{
+config.macros.todo2 = {
+    handler: function(place, macroName, params, wikifier, paramString, tiddler) {
+        var e = document.createElement('span');
+        e.tiddler = tiddler;
+        e.params = params;
+        e.matchStart = wikifier.matchStart;
+
+        if (params[0] == '0') {
+//            e.setAttribute('style','color: white; background:gray;font-weight:bold;padding:1px 2px;');
+            e.setAttribute('style','color: #ffffff; background:#a0a0a0;font-weight:bold;padding:1px 2px;');
+            e.appendChild(document.createTextNode(&quot;DONE&quot;));
+        }
+        else {
+            //    e.setAttribute('style','color: white; background:red; font-weight:bold;padding:1px 2px;');
+            e.setAttribute('style','color: #ffffff; background:#f04020; font-weight:bold;padding:1px 2px;');
+            e.appendChild(document.createTextNode(&quot;TODO&quot;));
+        }
+
+        place.appendChild(e);
+
+        addEvent(e, 'mousedown', this.onMouseDown);
+
+        return(e);
+    },
+
+    onMouseDown: function(event) {
+        if (this.params[0] == '0') {
+            if (confirm(&quot;DONE -&gt; TODO ?&quot;))
+                config.macros.todo2.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;todo2&gt;&gt;&quot;, true, null);
+        } else {
+            var result = this.tiddler.text.substr(this.matchStart).match(/&gt;&gt;\s*?(.*?)\n/);
+            config.macros.todo2.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;todo2 0&gt;&gt;&quot;, true, &quot;[DONE] &quot; + result[1]);
+        }
+    },
+
+    replace: function(tiddler, matchStart, replaceText, isSave, message) {
+        var pos = tiddler.text.substr(matchStart).search(&quot;&gt;&gt;&quot;);
+        pos += 2;
+
+        tiddler.text = tiddler.text.substr(0, matchStart) + replaceText + tiddler.text.substr(matchStart + pos);
+
+        // 表示を更新
+        if (!story.isDirty(tiddler.title)) {
+            // tiddlerの表示を更新する
+            story.refreshTiddler(tiddler.title,null,true);
+
+            // 内容を保存
+            if (isSave)
+                story.saveTiddler(tiddler.title,false);
+
+            // 右上にメッセージ
+            if (message)
+                displayMessage(message);
+        }
+    },
+
+    addEvent: function(elm, type, event) {
+        if (window.addEventListener)
+            elm.addEventListener(type, event, false);
+        else if (window.attachEvent)
+            elm.attachEvent('on'+type, event);
+        else 
+            elm['on'+type] = event;
+    }
+
+}
+    
+//}}}
+</pre>
+</div>
 <div title="GTDStyleWiki" modifier="氏名" created="201002021502" tags="GTD GTDdoc" changecount="1">
 <pre>GTDStyleWikiはTiddlyWikiをGTD用に拡張したソフトウェアです。
 
@@ -3255,6 +3356,402 @@ merge(config.annotations,{
 	});
 //}}}</pre>
 </div>
+<div title="LocalTweetPlugin" modifier="ongaeshi" created="201007031746" modified="201007151702" tags="systemConfig" creator="YourName" server.type="file" server.host="ongaeshi.tiddlyspot.com/#LocalTweetPlugin" server.page.revision="201007151702">
+<pre>/***
+|''Name''|LocalTweetPlugin|
+|''Description''|Tweet to TiddlyWiki|
+|''Author''|ongaeshi|
+|''Plugin last updated''|2010/07/15 01:34|
+|''Version''|1.0.5|
+|''SHA-1 hash''||
+|''Min. TiddlyWiki version required''|2.0.11|
+|''Dependencies''||
+|''Size''|10.0KB|
+|''License''|http://www.opensource.org/licenses/mit-license.php|
+|''URL''|http://ongaeshi.tiddlyspot.com/#LocalTweetPlugin|
+!Description
+You can tweet to TiddlyWiki.
+!Notes
+The tweet macro can be put only by one per tiddler 1.
+!Examples
+&lt;&lt;tweet&gt;&gt;
+@@color(red):fiz!!@@ buzz!! @@fiz@@ @@bgcolor(#000000):color(#00FFFF):buzz!!@@
+~~@@color(gray):2010/07/04 1:30@@~~
+----
+--good bye.--
+~~@@color(gray):2010/07/04 0:21@@~~
+----
+''@@color(red):hello.@@''
+~~@@color(gray):2010/07/03 8:30@@~~
+----
+!Usage
+{{{
+&lt;&lt;tweet&gt;&gt;
+}}}
+!Revision History
+|2010-07-15|v1.0.5|It corresponds because the mutter disappears with &quot;close&quot; button. |
+|2010-07-14|v1.0.4|Warning is put out if the tweet of the ''&quot;unsaved&quot;'' in the text area. &lt;br&gt;When enter from the right when entering from the under only below, it is possible to expand only right.&lt;br&gt;Bug fix.|
+|2010-07-08|v1.0.3|Parameter adjustment.|
+|2010-07-07|v1.0.2|If Tweet is done once, the bug into which the cursor is not changed is corrected.|
+|2010-07-06|v1.0.1|TextArea is resized possible.|
+|2010-07-04|v1.0.0|1st version.|
+!To Do
+&lt;...&gt;
+!Code
+***/
+//{{{
+
+// tweetマクロ本体
+config.macros.tweet = {
+    // つぶやき用のフォームを作成する
+    handler: function(place, macroName, params, wikifier, paramString, tiddler) {
+        var div = document.createElement(&quot;div&quot;);
+        div.setAttribute(&quot;style&quot;, &quot;position: relative; width: 550px&quot;)
+        place.appendChild(div);
+
+        var h3 = document.createElement(&quot;h3&quot;);
+        h3.appendChild(document.createTextNode(&quot;What are you doing?&quot;));
+
+        h3.setAttribute(&quot;style&quot;, &quot;color: #ffffff; background-color: #35CDFF&quot;);
+        div.appendChild(h3);
+
+        var textarea = document.createElement(&quot;textarea&quot;);
+        textarea.name = &quot;tweet_textarea&quot;;
+        textarea.cols = 65;
+        textarea.rows = 2;
+        textarea.tiddler = tiddler;
+        div.appendChild(textarea);
+        new this.TweetTextAreaMovable(textarea);
+        
+        var div2 = document.createElement(&quot;div&quot;);
+        div2.setAttribute(&quot;style&quot;, &quot;float: right; position: relative; width: 30%;&quot;);
+	var input = document.createElement(&quot;input&quot;);
+	input.setAttribute(&quot;type&quot;,&quot;submit&quot;);
+	input.setAttribute(&quot;value&quot;,&quot;tweet&quot;);
+	input.setAttribute(&quot;style&quot;,&quot;width: 100%;&quot;);
+        input.onclick = this.tweetOnClick;
+        input.tiddler = tiddler;
+        input.textarea = textarea;
+        input.matchStart = wikifier.matchStart;
+        div2.appendChild(input);
+        div.appendChild(div2);
+    },
+
+    // submitボタンが押されたらつぶやきを追記
+    //   thisには押された対象が渡される、つまりこの場合は[submit]ボタン
+    //   thisの省略は出来ない、エラーになる
+    tweetOnClick: function() {  
+        var text = this.textarea.value;
+
+        if (text == &quot;&quot;)
+            return;
+
+        var tweetText = &quot;&quot;;
+        tweetText += text + config.macros.tweet.insertLineFeed(text);
+        tweetText += config.macros.tweet.currentTimeString();
+        tweetText += &quot;----\n&quot;;
+
+        // &lt;&lt;tweet&gt;&gt;マクロの直下に挿入
+        var tidText = this.tiddler.text.substr(this.matchStart);
+        var pos = tidText.search(&quot;&lt;&lt;tweet&gt;&gt;.*\n&quot;);
+        pos = tidText.indexOf(&quot;\n&quot;, pos);
+        this.tiddler.text = this.tiddler.text.substr(0, this.matchStart) + tidText.substr(0, pos + 1) + tweetText + tidText.substr(pos + 1);
+
+        // 表示を更新
+	if (!story.isDirty(this.tiddler.title)) {
+            // tiddlerの表示を更新する
+            story.refreshTiddler(this.tiddler.title,null,true);
+            story.saveTiddler(this.tiddler.title,false);
+
+            // つぶやいた内容を右上にも表示させる
+            displayMessage(text);
+        }
+    },
+
+    // 最後が改行でなければ改行を追加
+    insertLineFeed: function(text) {
+        if (text.substr(text.length - 1) != &quot;\n&quot;)
+            return &quot;\n&quot;;
+        else
+            return &quot;&quot;;
+    },
+
+    // 現在時間の文字列を作成
+    currentTimeString: function() {
+        var date = new Date();
+
+        var month = date.getMonth() + 1;
+        if (month &lt;= 9)
+            month = &quot;0&quot; + month;
+
+        var day = date.getDate();
+        if (day &lt;= 9)
+            day = &quot;0&quot; + day;
+
+        var minutes = date.getMinutes();
+        if (minutes &lt;= 9)
+            minutes = &quot;0&quot; + minutes;
+        
+        var str = date.getFullYear() + &quot;/&quot; + month + &quot;/&quot; + day + &quot; &quot; + date.getHours() + &quot;:&quot; + minutes;
+
+        return &quot;~~@@color(gray):&quot; + str + &quot;@@~~&quot; + &quot;\n&quot;;
+    }
+};
+
+// ローカル関数群、関数で包み込んで名前空間を汚さないようにする
+(function() {
+var TweetTextAreaMovable = function(elm) {
+    OFFSET_X_MIN = 0;
+    OFFSET_X_MAX = 24;
+
+    OFFSET_Y_MIN = 0;
+    OFFSET_Y_MAX = 18;
+
+    WIDTH_MIN = 400;
+    HEIGHT_MIN = 25;
+
+    MOVE_NONE = -1;
+    MOVE_RIGHT = 0;
+    MOVE_UNDER = 1;
+    MOVE_RIGHTUNDER = 2;
+
+    this.elm_ = elm;
+    this.moveDir_ = MOVE_NONE;
+    this.moveOffset_ = {x:0, y:0};
+    this.rect = new Rect(this.elm_);
+    
+    this.inintialize(elm);
+}
+
+TweetTextAreaMovable.prototype = {
+    inintialize: function(elm) {
+        var self = this;
+        
+        addEvent(elm, 'mousedown', function (e) {
+            var isU = self.isUnderMovable(e);
+            var isR = self.isRightMovable(e);
+            
+            if (isU || isR) {
+                if (isR &amp;&amp; isU)
+                    self.moveDir_ = MOVE_RIGHTUNDER;
+                else if (isR)
+                    self.moveDir_ = MOVE_RIGHT;
+                else
+                    self.moveDir_ = MOVE_UNDER;
+                var page = mousePage(e);
+                self.moveOffset_.x = self.rect.right() - page.x;
+                self.moveOffset_.y = self.rect.bottom() - page.y;
+            }
+        });
+
+        addEvent(document.body, 'mouseup', function (e) {
+            if (self.moveDir_ != MOVE_NONE)
+                self.moveDir_ = MOVE_NONE;
+
+            self._cursorUpdate(e);
+        });
+
+        addEvent(document.body, 'mousemove', function (e) {
+            if (self.moveDir_ != MOVE_NONE)
+                self.doResize(e);
+            
+            self._cursorUpdate(e);
+        });
+    },
+    
+    isRightUnderMovable: function(e) {
+        return this.isUnderMovable(e) &amp;&amp; this.isRightMovable(e);
+    },
+
+    isUnderMovable: function(e) {
+        var page = mousePage(e);
+
+        if (this.rect.bottom() - OFFSET_Y_MAX &lt; page.y &amp;&amp; page.y &lt; this.rect.bottom() - OFFSET_Y_MIN) {
+            return true;
+        }
+
+        return false;
+    },
+    
+    isRightMovable: function(e) {
+        var page = mousePage(e);
+
+        if (this.rect.right() - OFFSET_X_MAX &lt; page.x &amp;&amp; page.x &lt; this.rect.right() - OFFSET_X_MIN) {
+            return true;
+        }
+
+        return false;
+    },
+
+    doResize: function(e) {
+        var page = mousePage(e);
+        var width  = page.x - this.rect.left() + this.moveOffset_.x;
+        var height = page.y - this.rect.top() + this.moveOffset_.y;
+
+        if (width  &lt; WIDTH_MIN) width  = WIDTH_MIN;
+        if (height &lt; HEIGHT_MIN) height = HEIGHT_MIN;
+
+        if (this.moveDir_ == MOVE_UNDER || this.moveDir_ == MOVE_RIGHTUNDER)
+            this.elm_.style.height = height + 'px';
+        if (this.moveDir_ == MOVE_RIGHT || this.moveDir_ == MOVE_RIGHTUNDER)
+            this.elm_.style.width  = width  + 'px';
+    },
+
+    _cursorUpdate: function(e) {
+        var cursorKind = this._calcCursorKind(e);
+
+        if (cursorKind == null) {
+            if (this.elm_.style.cursor == 'se-resize' ||
+                this.elm_.style.cursor == 's-resize' ||
+                this.elm_.style.cursor == 'e-resize')
+                this.elm_.style.cursor = null;
+
+        } else {
+            if (this.elm_.style.cursor != cursorKind)
+                this.elm_.style.cursor = cursorKind;
+        }
+    },
+
+    _calcCursorKind: function(e) {
+        if (this.moveDir_ == MOVE_RIGHTUNDER)
+            return 'se-resize';
+        if (this.moveDir_ == MOVE_UNDER)
+            return 's-resize';
+        if (this.moveDir_ == MOVE_RIGHT)
+            return 'e-resize';
+
+        if (this.isRightUnderMovable(e))
+            return 'se-resize';
+        if (this.isUnderMovable(e))
+            return 's-resize';
+        if (this.isRightMovable(e))
+            return 'e-resize';
+
+        return null;
+    },
+}
+
+var addEvent = (window.addEventListener) ?
+   (function(elm, type, event) {
+      elm.addEventListener(type, event, false);
+   }) : (window.attachEvent) ?
+   (function(elm, type, event) {
+      elm.attachEvent('on'+type, event);
+   }) :
+   (function(elm, type, event) {
+      elm['on'+type] = event;
+   }) ;
+
+var Rect = function(elm) {
+    this.elm_ = elm;
+}
+
+Rect.prototype = {
+    top: function() { return this._offset('Top', this.elm_); },
+    bottom: function() { return this.top() + this.elm_.offsetHeight; },
+    left: function() { return this._offset('Left', this.elm_); },
+    right: function() { return this.left() + this.elm_.offsetWidth; },
+
+    width: function() { return this.elm_.width; },
+    height: function() { return this.elm_.width; },
+
+   _offset: function(prop, elm) {
+      if(!elm.offsetParent || elm.offsetParent.tagName.toLowerCase() == &quot;body&quot;)
+         return elm['offset'+prop];
+      else
+         return elm['offset'+prop]+ this._offset(prop, elm.offsetParent);
+   }
+}
+
+function mousePage(e)
+{
+    var pos = {};
+    
+    if (document.all) {
+        pos.x = event.x + (document.body.scrollLeft || document.documentElement.scrollLeft);
+        pos.y = event.y + (document.body.scrollTop  || document.documentElement.scrollTop);
+        return pos;
+    } else {
+        pos.x = e.pageX;
+        pos.y = e.pageY;
+        return pos;
+    }
+}
+        
+// あるオブジェクトを複製する。
+// 複製元となったオブジェクトは__super__で参照可能。
+function clone(s) 
+{
+    function f(){};
+    f.prototype = s;
+    f.prototype.__super__ = s;
+    return new f();
+}
+
+// 指定tiddlerが編集中か？
+function isTweetEditing(title) {
+    var elems = document.getElementsByName(&quot;tweet_textarea&quot;);
+
+    for (var i = 0; i &lt; elems.length; i++) {
+        var textarea = elems.item(i);
+
+        if (title == textarea.tiddler.title &amp;&amp;
+            textarea.value != &quot;&quot;) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// 編集コマンドをカスタマイズする
+var tweetEditTiddler = clone(config.commands.editTiddler);
+
+tweetEditTiddler.handler = function(event, src, title) {
+    if (!isTweetEditing(title))
+        this.__super__.handler(event, src, title);
+    else
+        alert(&quot;The tweet of the \&quot;unsaved\&quot; in the text area.\nPlease push the [tweet] button or empty the text area.&quot;);
+}
+
+config.commands.editTiddler = tweetEditTiddler;
+
+// 閉じるコマンドをカスタマイズする
+var tweetCloseTiddler = clone(config.commands.closeTiddler);
+
+tweetCloseTiddler.handler = function(event, src, title) {
+    if (!isTweetEditing(title))
+        this.__super__.handler(event, src, title);
+    else
+        alert(&quot;The tweet of the \&quot;unsaved\&quot; in the text area.\nPlease push the [tweet] button or empty the text area.&quot;);
+}
+
+config.commands.closeTiddler = tweetCloseTiddler;
+
+// 他を閉じるコマンドをカスタマイズする
+var tweetCloseOthers = clone(config.commands.closeOthers);
+
+tweetCloseOthers.handler = function(event, src, title) {
+    var exclude = title;
+
+    clearMessage();
+    story.forEachTiddler(function(title,element) {
+	if(!isTweetEditing(title) &amp;&amp; (title != exclude) &amp;&amp; element.getAttribute(&quot;dirty&quot;) != &quot;true&quot;)
+	    story.closeTiddler(title);
+    });
+    window.scrollTo(0,ensureVisible(story.container));
+}
+
+config.commands.closeOthers = tweetCloseOthers;
+
+// マクロ内で使用するデータのみ名前空間に接続する
+var ns = config.macros.tweet;
+ns.TweetTextAreaMovable = TweetTextAreaMovable;
+})();
+
+//}}}
+</pre>
+</div>
 <div title="MainMenu" modifier="氏名" created="201002011519" modified="201002011551" tags="GTD GTDsys" changecount="5">
 <pre>&lt;&lt;gtdmenu chkMenuMain GtdMenuMain メインメニュー メインメニュー&gt;&gt;&lt;&lt;gtdmenu chkMenuInbox GtdMenuInbox 新着リスト 新着リスト&gt;&gt;&lt;&lt;gtdmenu chkMenuSchedule GtdMenuSchedule スケジュール スケジュール&gt;&gt;&lt;&lt;gtdmenu chkMenuNextAction GtdMenuNextAction 次の行動リスト 次の行動リスト&gt;&gt;&lt;&lt;gtdmenu chkMenuOtherList GtdMenuOtherList その他リスト その他リスト&gt;&gt;&lt;&lt;gtdmenu chkMenuTool GtdMenuTool メンテナンス メンテナンス&gt;&gt;&lt;&lt;gtdmenu chkMenuHelp GtdMenuHelp ヘルプ ヘルプ&gt;&gt;
 !!!~TiddlyWiki</pre>
@@ -3530,6 +4027,202 @@ body {
 </div>
 <div title="TicklerFile（一列表示）" modifier="氏名" created="201002021432" tags="Sample" changecount="1">
 <pre>&lt;&lt;gtdTicklerFile 1 1 null null '0DD(DDD)'&gt;&gt;</pre>
+</div>
+<div title="TiddlersBarPlugin" created="200708071235" modified="201012071046" tags="VisualTW _systemConfig Tools" server.type="file" server.host="visualtw.ouvaton.org/VisualTW.html" server.page.revision="200801181510" label="TiddlersBar" changecount="1">
+<pre>/***
+|''Name:''|TiddlersBarPlugin|
+|''Description:''|A bar to switch between tiddlers through tabs (like browser tabs bar).|
+|''Version:''|1.2.5|
+|''Date:''|Jan 18,2008|
+|''Source:''|http://visualtw.ouvaton.org/VisualTW.html|
+|''Author:''|Pascal Collin|
+|''License:''|[[BSD open source license|License]]|
+|''~CoreVersion:''|2.1.0|
+|''Browser:''|Firefox 2.0; InternetExplorer 6.0, others|
+!Demos
+On [[homepage|http://visualtw.ouvaton.org/VisualTW.html]], open several tiddlers to use the tabs bar.
+!Installation
+#import this tiddler from [[homepage|http://visualtw.ouvaton.org/VisualTW.html]] (tagged as systemConfig)
+#save and reload
+#''if you're using a custom [[PageTemplate]]'', add {{{&lt;div id='tiddlersBar' refresh='none' ondblclick='config.macros.tiddlersBar.onTiddlersBarAction(event)'&gt;&lt;/div&gt;}}} before {{{&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;}}}
+#optionally, adjust StyleSheetTiddlersBar
+!Tips
+*Doubleclick on the tiddlers bar (where there is no tab) create a new tiddler.
+*Tabs include a button to close {{{x}}} or save {{{!}}} their tiddler.
+*By default, click on the current tab close all others tiddlers.
+!Configuration options 
+&lt;&lt;option chkDisableTabsBar&gt;&gt; Disable the tabs bar (to print, by example).
+&lt;&lt;option chkHideTabsBarWhenSingleTab &gt;&gt; Automatically hide the tabs bar when only one tiddler is displayed. 
+&lt;&lt;option txtSelectedTiddlerTabButton&gt;&gt; ''selected'' tab command button.
+&lt;&lt;option txtPreviousTabKey&gt;&gt; previous tab access key.
+&lt;&lt;option txtNextTabKey&gt;&gt; next tab access key.
+!Code
+***/
+//{{{
+config.options.chkDisableTabsBar = config.options.chkDisableTabsBar ? config.options.chkDisableTabsBar : false;
+config.options.chkHideTabsBarWhenSingleTab  = config.options.chkHideTabsBarWhenSingleTab  ? config.options.chkHideTabsBarWhenSingleTab  : false;
+config.options.txtSelectedTiddlerTabButton = config.options.txtSelectedTiddlerTabButton ? config.options.txtSelectedTiddlerTabButton : &quot;closeOthers&quot;;
+config.options.txtPreviousTabKey = config.options.txtPreviousTabKey ? config.options.txtPreviousTabKey : &quot;&quot;;
+config.options.txtNextTabKey = config.options.txtNextTabKey ? config.options.txtNextTabKey : &quot;&quot;;
+config.macros.tiddlersBar = {
+	tooltip : &quot;see &quot;,
+	tooltipClose : &quot;click here to close this tab&quot;,
+	tooltipSave : &quot;click here to save this tab&quot;,
+	promptRename : &quot;Enter tiddler new name&quot;,
+	currentTiddler : &quot;&quot;,
+	previousState : false,
+	previousKey : config.options.txtPreviousTabKey,
+	nextKey : config.options.txtNextTabKey,	
+	tabsAnimationSource : null, //use document.getElementById(&quot;tiddlerDisplay&quot;) if you need animation on tab switching.
+	handler: function(place,macroName,params) {
+		var previous = null;
+		if (config.macros.tiddlersBar.isShown())
+			story.forEachTiddler(function(title,e){
+				if (title==config.macros.tiddlersBar.currentTiddler){
+					var d = createTiddlyElement(null,&quot;span&quot;,null,&quot;tab tabSelected&quot;);
+					config.macros.tiddlersBar.createActiveTabButton(d,title);
+					if (previous &amp;&amp; config.macros.tiddlersBar.previousKey) previous.setAttribute(&quot;accessKey&quot;,config.macros.tiddlersBar.nextKey);
+					previous = &quot;active&quot;;
+				}
+				else {
+					var d = createTiddlyElement(place,&quot;span&quot;,null,&quot;tab tabUnselected&quot;);
+					var btn = createTiddlyButton(d,title,config.macros.tiddlersBar.tooltip + title,config.macros.tiddlersBar.onSelectTab);
+					btn.setAttribute(&quot;tiddler&quot;, title);
+					if (previous==&quot;active&quot; &amp;&amp; config.macros.tiddlersBar.nextKey) btn.setAttribute(&quot;accessKey&quot;,config.macros.tiddlersBar.previousKey);
+					previous=btn;
+				}
+				var isDirty =story.isDirty(title);
+				var c = createTiddlyButton(d,isDirty ?&quot;!&quot;:&quot;x&quot;,isDirty?config.macros.tiddlersBar.tooltipSave:config.macros.tiddlersBar.tooltipClose, isDirty ? config.macros.tiddlersBar.onTabSave : config.macros.tiddlersBar.onTabClose,&quot;tabButton&quot;);
+				c.setAttribute(&quot;tiddler&quot;, title);
+				if (place.childNodes) {
+					place.insertBefore(document.createTextNode(&quot; &quot;),place.firstChild); // to allow break line here when many tiddlers are open
+					place.insertBefore(d,place.firstChild); 
+				}
+				else place.appendChild(d);
+			})
+	}, 
+	refresh: function(place,params){
+		removeChildren(place);
+		config.macros.tiddlersBar.handler(place,&quot;tiddlersBar&quot;,params);
+		if (config.macros.tiddlersBar.previousState!=config.macros.tiddlersBar.isShown()) {
+			story.refreshAllTiddlers();
+			if (config.macros.tiddlersBar.previousState) story.forEachTiddler(function(t,e){e.style.display=&quot;&quot;;});
+			config.macros.tiddlersBar.previousState = !config.macros.tiddlersBar.previousState;
+		}
+	},
+	isShown : function(){
+		if (config.options.chkDisableTabsBar) return false;
+		if (!config.options.chkHideTabsBarWhenSingleTab) return true;
+		var cpt=0;
+		story.forEachTiddler(function(){cpt++});
+		return (cpt&gt;1);
+	},
+	selectNextTab : function(){  //used when the current tab is closed (to select another tab)
+		var previous=&quot;&quot;;
+		story.forEachTiddler(function(title){
+			if (!config.macros.tiddlersBar.currentTiddler) {
+				story.displayTiddler(null,title);
+				return;
+			}
+			if (title==config.macros.tiddlersBar.currentTiddler) {
+				if (previous) {
+					story.displayTiddler(null,previous);
+					return;
+				}
+				else config.macros.tiddlersBar.currentTiddler=&quot;&quot;; 	// so next tab will be selected
+			}
+			else previous=title;
+			});		
+	},
+	onSelectTab : function(e){
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (t) story.displayTiddler(null,t);
+		return false;
+	},
+	onTabClose : function(e){
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (t) {
+			if(story.hasChanges(t) &amp;&amp; !readOnly) {
+				if(!confirm(config.commands.cancelTiddler.warning.format([t])))
+				return false;
+			}
+			story.closeTiddler(t);
+		}
+		return false;
+	},
+	onTabSave : function(e) {
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (!e) e=window.event;
+		if (t) config.commands.saveTiddler.handler(e,null,t);
+		return false;
+	},
+	onSelectedTabButtonClick : function(event,src,title) {
+		var t = this.getAttribute(&quot;tiddler&quot;);
+		if (!event) event=window.event;
+		if (t &amp;&amp; config.options.txtSelectedTiddlerTabButton &amp;&amp; config.commands[config.options.txtSelectedTiddlerTabButton])
+			config.commands[config.options.txtSelectedTiddlerTabButton].handler(event, src, t);
+		return false;
+	},
+	onTiddlersBarAction: function(event) {
+		var source = event.target ? event.target.id : event.srcElement.id; // FF uses target and IE uses srcElement;
+		if (source==&quot;tiddlersBar&quot;) story.displayTiddler(null,'New Tiddler',DEFAULT_EDIT_TEMPLATE,false,null,null);
+	},
+	createActiveTabButton : function(place,title) {
+		if (config.options.txtSelectedTiddlerTabButton &amp;&amp; config.commands[config.options.txtSelectedTiddlerTabButton]) {
+			var btn = createTiddlyButton(place, title, config.commands[config.options.txtSelectedTiddlerTabButton].tooltip ,config.macros.tiddlersBar.onSelectedTabButtonClick);
+			btn.setAttribute(&quot;tiddler&quot;, title);
+		}
+		else
+			createTiddlyText(place,title);
+	}
+}
+
+story.coreCloseTiddler = story.coreCloseTiddler? story.coreCloseTiddler : story.closeTiddler;
+story.coreDisplayTiddler = story.coreDisplayTiddler ? story.coreDisplayTiddler : story.displayTiddler;
+
+story.closeTiddler = function(title,animate,unused) {
+	if (title==config.macros.tiddlersBar.currentTiddler)
+		config.macros.tiddlersBar.selectNextTab();
+	story.coreCloseTiddler(title,false,unused); //disable animation to get it closed before calling tiddlersBar.refresh
+	var e=document.getElementById(&quot;tiddlersBar&quot;);
+	if (e) config.macros.tiddlersBar.refresh(e,null);
+}
+
+story.displayTiddler = function(srcElement,tiddler,template,animate,unused,customFields,toggle){
+	story.coreDisplayTiddler(config.macros.tiddlersBar.tabsAnimationSource,tiddler,template,animate,unused,customFields,toggle);
+	var title = (tiddler instanceof Tiddler)? tiddler.title : tiddler;  
+	if (config.macros.tiddlersBar.isShown()) {
+		story.forEachTiddler(function(t,e){
+			if (t!=title) e.style.display=&quot;none&quot;;
+			else e.style.display=&quot;&quot;;
+		})
+		config.macros.tiddlersBar.currentTiddler=title;
+	}
+	var e=document.getElementById(&quot;tiddlersBar&quot;);
+	if (e) config.macros.tiddlersBar.refresh(e,null);
+}
+
+var coreRefreshPageTemplate = coreRefreshPageTemplate ? coreRefreshPageTemplate : refreshPageTemplate;
+refreshPageTemplate = function(title) {
+	coreRefreshPageTemplate(title);
+	if (config.macros.tiddlersBar) config.macros.tiddlersBar.refresh(document.getElementById(&quot;tiddlersBar&quot;));
+}
+
+ensureVisible=function (e) {return 0} //disable bottom scrolling (not useful now)
+
+config.shadowTiddlers.StyleSheetTiddlersBar = &quot;/*{{{*/\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar .button {border:0}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar .tab {white-space:nowrap}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;#tiddlersBar {padding : 1em 0.5em 2px 0.5em}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;.tabUnselected .tabButton, .tabSelected .tabButton {padding : 0 2px 0 2px; margin: 0 0 0 4px;}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar += &quot;.tiddler, .tabContents {border:1px [[ColorPalette::TertiaryPale]] solid;}\n&quot;;
+config.shadowTiddlers.StyleSheetTiddlersBar +=&quot;/*}}}*/&quot;;
+store.addNotification(&quot;StyleSheetTiddlersBar&quot;, refreshStyles);
+
+config.refreshers.none = function(){return true;}
+config.shadowTiddlers.PageTemplate=config.shadowTiddlers.PageTemplate.replace(/&lt;div id='tiddlerDisplay'&gt;&lt;\/div&gt;/m,&quot;&lt;div id='tiddlersBar' refresh='none' ondblclick='config.macros.tiddlersBar.onTiddlersBarAction(event)'&gt;&lt;/div&gt;\n&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;&quot;);
+
+//}}}</pre>
 </div>
 <div title="ViewTemplate" modifier="氏名" created="201002021421" modified="201002081605" tags="GTD GTDsys" changecount="2">
 <pre>&lt;div class='title' macro='view title'&gt;&lt;/div&gt;
