@@ -512,7 +512,7 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="ClickTodoPlugin" created="201007101502" modified="201011301042" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#ClickTodoPlugin" server.page.revision="201007120147" changecount="2">
+<div title="ClickTodoPlugin" modifier="YourName" created="201007101502" modified="201012291641" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#ClickTodoPlugin" server.page.revision="201012291641">
 <pre>/***
 |''Name''|ClickTodoPlugin|
 |''Description''|TODO plugin that can be clicked. |
@@ -1125,13 +1125,13 @@ merge(config.annotations,{
 	});
 //}}}</pre>
 </div>
-<div title="LocalTweetPlugin" modifier="ongaeshi" created="201007031746" modified="201007151702" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#LocalTweetPlugin" server.page.revision="201007151702">
+<div title="LocalTweetPlugin" modifier="YourName" created="201007031746" modified="201012291631" tags="systemConfig" server.type="file" server.host="ongaeshi.tiddlyspot.com/#LocalTweetPlugin" server.page.revision="201012291631">
 <pre>/***
 |''Name''|LocalTweetPlugin|
 |''Description''|Tweet to TiddlyWiki|
 |''Author''|ongaeshi|
-|''Plugin last updated''|2010/07/15 01:34|
-|''Version''|1.0.5|
+|''Plugin last updated''|2010/12/30 01:27|
+|''Version''|1.0.6|
 |''SHA-1 hash''||
 |''Min. TiddlyWiki version required''|2.0.11|
 |''Dependencies''||
@@ -1158,6 +1158,7 @@ The tweet macro can be put only by one per tiddler 1.
 &lt;&lt;tweet&gt;&gt;
 }}}
 !Revision History
+|2010-12-30|v1.0.6|It changes line to the end of line for [[&lt;&lt;tweet&gt;&gt;]] no changing line.|
 |2010-07-15|v1.0.5|It corresponds because the mutter disappears with &quot;close&quot; button. |
 |2010-07-14|v1.0.4|Warning is put out if the tweet of the ''&quot;unsaved&quot;'' in the text area. &lt;br&gt;When enter from the right when entering from the under only below, it is possible to expand only right.&lt;br&gt;Bug fix.|
 |2010-07-08|v1.0.3|Parameter adjustment.|
@@ -1222,8 +1223,15 @@ config.macros.tweet = {
 
         // &lt;&lt;tweet&gt;&gt;マクロの直下に挿入
         var tidText = this.tiddler.text.substr(this.matchStart);
-        var pos = tidText.search(&quot;&lt;&lt;tweet&gt;&gt;.*\n&quot;);
-        pos = tidText.indexOf(&quot;\n&quot;, pos);
+
+        // 挿入位置を探す
+        var pos = tidText.search(/$/m);
+
+        // 行末に【&lt;&lt;tweet&gt;&gt;改行無し】の場合は改行する
+        if (tidText.indexOf(&quot;\n&quot;) == -1)
+            tweetText = &quot;\n&quot; + tweetText;
+
+        // 挿入
         this.tiddler.text = this.tiddler.text.substr(0, this.matchStart) + tidText.substr(0, pos + 1) + tweetText + tidText.substr(pos + 1);
 
         // 表示を更新
