@@ -44,7 +44,7 @@ DAMAGE.
 <!--}}}-->
 
 <!--PRE-HEAD-END-->
-<title> My TiddlyWiki - a reusable non-linear personal web notebook </title>
+<title> メモ - 2012 - 今年の抱負を書く予定 </title>
 <style id="styleArea" type="text/css">
 #saveTest {display:none;}
 #messageArea {display:none;}
@@ -615,6 +615,27 @@ config.macros.todo2 = {
     
 //}}}
 </pre>
+</div>
+<div title="ColorPalette" created="201212251132" changecount="1">
+<pre>Background: #fff
+Foreground: #000
+PrimaryPale: #8cf
+PrimaryLight: #9900FF
+PrimaryMid: #590097
+PrimaryDark: #014
+SecondaryPale: #ffc
+SecondaryLight: #fe8
+SecondaryMid: #db4
+SecondaryDark: #841
+TertiaryPale: #eee
+TertiaryLight: #ccc
+TertiaryMid: #999
+TertiaryDark: #666
+Error: #f88
+</pre>
+</div>
+<div title="DefaultTiddlers" created="201011290211" server.type="file" server.host="file:///Users/ongaeshi/Documents/my_tiddlywiki/2013/memo/memo.html" server.page.revision="201011290211">
+<pre>[[Startup]]</pre>
 </div>
 <div title="JapaneseTranslationPlugin" modifier="Ogoshi" created="200709231934" modified="201004290508" tags="systemConfig">
 <pre>/***
@@ -1529,6 +1550,79 @@ ns.TweetTextAreaMovable = TweetTextAreaMovable;
 //}}}
 </pre>
 </div>
+<div title="MainMenu" created="201011290209" modified="201011290216">
+<pre>[[スタート|Startup]] [[つぶやき|Tweet - New]] [[巡回]]</pre>
+</div>
+<div title="SiteSubtitle" created="201011290206" modified="201011290206">
+<pre>今年の抱負を書く予定</pre>
+</div>
+<div title="SiteTitle" created="201011290205" modified="201201010849">
+<pre>メモ - 2012</pre>
+</div>
+<div title="Startup" created="201011290211" modified="201201020548">
+<pre>! よく使う
+
+! ドキュメント
+&lt;&lt;newTiddler label:&quot;新しいドキュメント&quot; tag:&quot;document&quot; focus:&quot;text&quot;&gt;&gt;
+&lt;&lt;list filter &quot;[tag[document]] [sort[-modified]]&quot;&gt;&gt;
+
+! つぶやき
+* [[Tweet - 12]]
+* [[Tweet - 11]]
+* [[Tweet - 10]]
+* [[Tweet - 9]]
+* [[Tweet - 8]]
+* [[Tweet - 7]]
+* [[Tweet - 6]]
+* [[Tweet - 5]]
+* [[Tweet - 4]]
+* [[Tweet - 3]]
+* [[Tweet - 2]]
+* [[Tweet - 1]]
+
+! その他
+[[GettingStarted]]
+</pre>
+</div>
+<div title="StyleSheet" created="201011290207">
+<pre>/*{{{*/
+
+.tiddler {
+border-top: solid 1px #ccc;
+border-left: solid 1px #ccc;
+border-right: solid 3px #aaa;
+border-bottom: solid 3px #aaa;
+padding: 1em 1em 1em 1em;
+margin: 0em 1em 2em 1em;
+background: #fff;
+color: 333366;
+}
+
+#mainMenu {
+position: static;
+width: auto;
+text-align:right;
+padding: 0em 1em 0em 1em;
+
+background-color: #eee;
+color:#cccccc;
+}
+
+#displayArea {
+margin: 1em 17em 0em 1em;
+padding:0;
+}
+
+#sidebar {
+position: absolute;
+right: 10px;
+width: 16em;
+font-size: .9em;
+}
+
+/*}}}*/
+</pre>
+</div>
 <div title="TiddlerListMacro" modifier="Jack" created="200604172103" modified="200801111333" tags="Plugin Favorite systemConfig">
 <pre>/***
 |''Name:''|TiddlerListMacro|
@@ -1935,6 +2029,24 @@ config.refreshers.none = function(){return true;}
 config.shadowTiddlers.PageTemplate=config.shadowTiddlers.PageTemplate.replace(/&lt;div id='tiddlerDisplay'&gt;&lt;\/div&gt;/m,&quot;&lt;div id='tiddlersBar' refresh='none' ondblclick='config.macros.tiddlersBar.onTiddlersBarAction(event)'&gt;&lt;/div&gt;\n&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;&quot;);
 
 //}}}</pre>
+</div>
+<div title="Tweet - New" created="201011290216" modified="201212251133" changecount="1">
+<pre>&lt;&lt;tweet&gt;&gt;
+[[ColorPalette]]の色変更 (2012)。
+{{{
+PrimaryLight: #9900FF
+PrimaryMid: #590097
+}}}
+~~@@color(gray):2012/01/02 15:47@@~~
+----
+</pre>
+</div>
+<div title="ドキュメントについて" created="201201020549" modified="201201020550" tags="document">
+<pre>* documentタグを付けたTiddlerはStartupページに自動でリンクが貼られます。
+* よく使うものは''よく使う''の項目にも入れましょう。</pre>
+</div>
+<div title="巡回" created="201011290216" modified="201011290217">
+<pre>良く見るページを登録しておく</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
