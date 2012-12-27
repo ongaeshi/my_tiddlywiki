@@ -13,7 +13,7 @@ TiddlyWikiを利用した備忘録です。
 
 ## インストール
 
-[Downloads](https://github.com/ongaeshi/my_tiddlywiki/downloads)
+[Downloads - Google Project Hosting](http://code.google.com/p/my-tiddlywiki/downloads/list)
 
 * 展開した``memo.html``をブラウザで開いて下さい。
 * 基本的な使い方は普通の``TiddlyWiki``と同じです
