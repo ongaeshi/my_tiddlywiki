@@ -637,6 +637,18 @@ Error: #f88
 <div title="DefaultTiddlers" created="201011290211" server.type="file" server.host="file:///Users/ongaeshi/Documents/my_tiddlywiki/2013/memo/memo.html" server.page.revision="201011290211">
 <pre>[[Startup]]</pre>
 </div>
+<div title="GetTagCountMacro" created="201312291613" tags="systemConfig" changecount="1">
+<pre>//{{{
+config.macros.getTagCount={
+ 
+handler:function(place,macroName,params,wikifier,paramString,tiddler)
+{
+    createTiddlyText(place,store.getTaggedTiddlers(params[0]).length);
+}
+
+} 
+//}}}</pre>
+</div>
 <div title="JapaneseTranslationPlugin" modifier="Ogoshi" created="200709231934" modified="201004290508" tags="systemConfig">
 <pre>/***
 |''Name:''|JapaneseTranslationPlugin |
@@ -1559,26 +1571,13 @@ ns.TweetTextAreaMovable = TweetTextAreaMovable;
 <div title="SiteTitle" created="201011290205" modified="201312291554" changecount="2">
 <pre>メモ - 2014</pre>
 </div>
-<div title="Startup" created="201011290211" modified="201201020548">
+<div title="Startup" created="201011290211" modified="201312291614" changecount="4">
 <pre>! よく使う
 
 ! ドキュメント
 &lt;&lt;newTiddler label:&quot;新しいドキュメント&quot; tag:&quot;document&quot; focus:&quot;text&quot;&gt;&gt;
-&lt;&lt;list filter &quot;[tag[document]] [sort[-modified]]&quot;&gt;&gt;
-
-! つぶやき
-* [[Tweet - 12]]
-* [[Tweet - 11]]
-* [[Tweet - 10]]
-* [[Tweet - 9]]
-* [[Tweet - 8]]
-* [[Tweet - 7]]
-* [[Tweet - 6]]
-* [[Tweet - 5]]
-* [[Tweet - 4]]
-* [[Tweet - 3]]
-* [[Tweet - 2]]
-* [[Tweet - 1]]
+&lt;&lt;tiddlerList tags:&quot;document&quot; order:&quot;-modified&quot; top:20&gt;&gt;
+[[全てのドキュメント]] - &lt;&lt;getTagCount document&gt;&gt;
 
 ! その他
 [[GettingStarted]]
@@ -2044,6 +2043,9 @@ PrimaryMid: #590097
 <div title="ドキュメントについて" created="201201020549" modified="201201020550" tags="document">
 <pre>* documentタグを付けたTiddlerはStartupページに自動でリンクが貼られます。
 * よく使うものは''よく使う''の項目にも入れましょう。</pre>
+</div>
+<div title="全てのドキュメント" created="201312291614" changecount="1">
+<pre>&lt;&lt;tiddlerList tags:&quot;document&quot;&gt;&gt;</pre>
 </div>
 <div title="巡回" created="201011290216" modified="201011290217">
 <pre>良く見るページを登録しておく</pre>
