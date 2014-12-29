@@ -649,6 +649,124 @@ handler:function(place,macroName,params,wikifier,paramString,tiddler)
 } 
 //}}}</pre>
 </div>
+<div title="IssuePlugin" created="201412291212" modified="201412291212" tags="systemConfig" changecount="2">
+<pre>/***
+|''Name''|IssuePlugin|
+|''Description''|Add Closed tag. |
+|''Author''|ongaeshi|
+|''Plugin last updated''|2014/04/05 00:30|
+|''Version''|0.1.0|
+|''SHA-1 hash''||ff
+|''Min. TiddlyWiki version required''|2.5.0|
+|''Dependencies''||
+|''Size''|3.0KB|
+|''License''|http://www.opensource.org/licenses/mit-license.php|
+|''URL''||
+!Description
+Set 'closed' tag plugin that can be clicked.
+!Notes
+!Examples
+&lt;&lt;issue&gt;&gt; Set 'closed' tag if it clicks.
+!Usage
+{{{
+&lt;&lt;issue&gt;&gt;
+}}}
+!Revision History
+|2014-04-05|v0.1.0|1st version.|
+!To Do
+&lt;...&gt;
+!Code
+***/
+//{{{
+config.macros.issue = {
+  handler: function(place, macroName, params, wikifier, paramString, tiddler) {
+    var e = document.createElement('span');
+    e.tiddler = tiddler;
+    e.params = params;
+    e.matchStart = wikifier.matchStart;
+
+    if (params[0] == '0') {
+      e.setAttribute('style','color: #ffffff; background:#f04020;font-weight:bold;padding:1px 2px;');
+      e.appendChild(document.createTextNode(&quot;Closed&quot;));
+    }
+    else {
+      e.setAttribute('style','color: #ffffff; background:#79D758; font-weight:bold;padding:1px 2px;');
+      e.appendChild(document.createTextNode(&quot;Open&quot;));
+    }
+
+    place.appendChild(e);
+
+    addEvent(e, 'mousedown', this.onMouseDown);
+
+    return(e);
+  },
+
+  onMouseDown: function(event) {
+    if (this.params[0] == '0') {
+      // Delete 'closed' tag
+      var tags = this.tiddler.tags;
+      var index = tags.indexOf(&quot;closed&quot;);
+      if (index != -1) {
+        tags.splice(index, 1);
+        story.refreshTiddler(this.tiddler.title,null,true);
+      }
+
+      // Replace text
+      config.macros.issue.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;issue&gt;&gt;&quot;, true, null);
+
+    } else {
+      // Add 'closed' tag
+      this.tiddler.tags.push(&quot;closed&quot;);
+
+      // Replace text
+      var result = this.tiddler.text.substr(this.matchStart).match(/&gt;&gt;\s*?(.*?)\n/);
+      config.macros.issue.replace(this.tiddler, this.matchStart, &quot;&lt;&lt;issue 0&gt;&gt;&quot;, true, &quot;[DONE] &quot; + result[1]);
+      
+    }
+  },
+
+  replace: function(tiddler, matchStart, replaceText, isSave, message) {
+    var pos = tiddler.text.substr(matchStart).search(&quot;&gt;&gt;&quot;);
+    pos += 2;
+
+    tiddler.text = tiddler.text.substr(0, matchStart) + replaceText + tiddler.text.substr(matchStart + pos);
+
+    // 表示を更新
+    if (!story.isDirty(tiddler.title)) {
+      // tiddlerの表示を更新する
+      story.refreshTiddler(tiddler.title,null,true);
+
+      // 内容を保存
+      if (isSave)
+        story.saveTiddler(tiddler.title,false);
+
+      // 右上にメッセージ
+      if (message)
+        displayMessage(message);
+    }
+  },
+
+  addEvent: function(elm, type, event) {
+    if (window.addEventListener)
+      elm.addEventListener(type, event, false);
+    else if (window.attachEvent)
+      elm.attachEvent('on'+type, event);
+    else
+      elm['on'+type] = event;
+  }
+}
+
+//}}}
+</pre>
+</div>
+<div title="Issueについて" created="201412291213" modified="201412291216" tags="document" changecount="8">
+<pre>* Issueを作成することが出来るようになりました → [[IssuePlugin]]
+* 以下のようにするとタスクを一覧することが出来るようになります
+* myprojectを独自のプロジェクト名にするとプロジェクト単位でタスクを管理することが出来ます
+&lt;&lt;newTiddler label:&quot;新規タスク&quot; tag:&quot;todo&quot; tag:&quot;myproject&quot; focus:&quot;text&quot;&gt;&gt;
+&lt;&lt;tiddlerList tags:&quot;todo,myproject,-closed,-いつか／もしかしたら&quot; order:&quot;-modified&quot;&gt;&gt;
+</pre>
+</div>
 <div title="JapaneseTranslationPlugin" modifier="Ogoshi" created="200709231934" modified="201004290508" tags="systemConfig">
 <pre>/***
 |''Name:''|JapaneseTranslationPlugin |
@@ -2039,6 +2157,16 @@ PrimaryMid: #590097
 ~~@@color(gray):2012/01/02 15:47@@~~
 ----
 </pre>
+</div>
+<div title="タスク1" created="201412291216" modified="201412291216" tags="todo myproject" changecount="2">
+<pre>&lt;&lt;issue&gt;&gt;
+
+上のIssueをクリックすると終了出来ます。</pre>
+</div>
+<div title="タスク2" created="201412291216" modified="201412291217" tags="todo myproject" changecount="5">
+<pre>&lt;&lt;issue&gt;&gt;
+
+上のIssueをクリックすると終了出来ます。</pre>
 </div>
 <div title="ドキュメントについて" created="201201020549" modified="201201020550" tags="document">
 <pre>* documentタグを付けたTiddlerはStartupページに自動でリンクが貼られます。
